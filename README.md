@@ -20,6 +20,7 @@ Works on **Windows**, **macOS**, and **Linux**.
 - Click the download button that appears on any video
 - Videos are queued in the app and download automatically
 - Works with 12+ social media platforms
+- Configurable settings page
 
 ## Prerequisites
 
@@ -80,6 +81,24 @@ Download the latest release from [GitHub Releases](https://github.com/a7mdmo74/y
 4. The video is added to the Browser Queue in the app
 5. Click the play button (▶) to start downloading
 
+### Extension Settings
+
+Right-click the YTGrab icon in your toolbar and select **Options** to configure:
+
+**Server Connection**
+- Set custom server address (default: `http://127.0.0.1:19850`)
+- Test connection to verify app is running
+
+**Download Behavior**
+- Auto-download on detection — automatically start download when video is detected
+- Show download button — toggle the download button overlay on videos
+- Show floating panel — toggle the YTGrab panel on video pages
+- Show notifications — toggle toast notifications
+
+**Supported Platforms**
+- Enable/disable detection for each platform individually
+- YouTube, Instagram, Facebook, Twitter/X, TikTok, Vimeo, Dailymotion, Twitch, Reddit, Bilibili, SoundCloud
+
 ### Supported Platforms
 
 - YouTube, YouTube Music
@@ -112,7 +131,7 @@ Download the latest release from [GitHub Releases](https://github.com/a7mdmo74/y
 4. Click the download button on videos
 5. Monitor progress in the Browser Queue
 
-## Settings
+## App Settings
 
 - **Output Format**: MP4, MKV, or WebM
 - **Parallel Fragments**: 1-8 (default: 3)

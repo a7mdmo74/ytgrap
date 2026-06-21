@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>YTGrab Settings</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #1c1f26;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #e8eaf0;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #2e3340;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .logo-yt { color: #ef4444; }
+        .logo-grab { color: #f5a623; }
+
+        .subtitle {
+            font-size: 14px;
+            color: #8890a4;
+        }
+
+        .section {
+            background: #22262f;
+            border: 1px solid #2e3340;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 16px;
+            background: #141720;
+            border-bottom: 1px solid #2e3340;
+        }
+
+        .section-icon {
+            font-size: 16px;
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #f5a623;
+        }
+
+        .section-body {
+            padding: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #e8eaf0;
+            margin-bottom: 6px;
+        }
+
+        .form-hint {
+            font-size: 11px;
+            color: #555d72;
+            margin-top: 4px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            background: #0f1117;
+            border: 1px solid #2e3340;
+            border-radius: 6px;
+            color: #e8eaf0;
+            font-size: 13px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #f5a623;
+        }
+
+        .form-input::placeholder {
+            color: #555d72;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 10px 12px;
+            background: #0f1117;
+            border: 1px solid #2e3340;
+            border-radius: 6px;
+            color: #e8eaf0;
+            font-size: 13px;
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #f5a623;
+        }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #2e3340;
+        }
+
+        .toggle-row:last-child {
+            border-bottom: none;
+        }
+
+        .toggle-info {
+            flex: 1;
+        }
+
+        .toggle-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #e8eaf0;
+        }
+
+        .toggle-desc {
+            font-size: 11px;
+            color: #555d72;
+            margin-top: 2px;
+        }
+
+        .toggle {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            cursor: pointer;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            inset: 0;
+            background: #2e3340;
+            border-radius: 12px;
+            transition: background 0.2s;
+        }
+
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            left: 3px;
+            top: 3px;
+            background: #e8eaf0;
+            border-radius: 50%;
+            transition: transform 0.2s;
+        }
+
+        .toggle input:checked + .toggle-slider {
+            background: #f5a623;
+        }
+
+        .toggle input:checked + .toggle-slider::before {
+            transform: translateX(20px);
+        }
+
+        .platform-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .platform-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            background: #141720;
+            border: 1px solid #2e3340;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .platform-item:hover {
+            border-color: #f5a623;
+        }
+
+        .platform-item input {
+            accent-color: #f5a623;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(180deg, #f5a623 0%, #d4891a 100%);
+            color: #1c1f26;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(180deg, #ffb840 0%, #f5a623 100%);
+        }
+
+        .btn-secondary {
+            background: #2e3340;
+            color: #e8eaf0;
+        }
+
+        .btn-secondary:hover {
+            background: #3a3f50;
+        }
+
+        .status-message {
+            text-align: center;
+            padding: 10px;
+            margin-top: 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .status-message.show {
+            opacity: 1;
+        }
+
+        .status-message.success {
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+        }
+
+        .status-message.error {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+
+        .version-info {
+            text-align: center;
+            margin-top: 32px;
+            padding-top: 20px;
+            border-top: 1px solid #2e3340;
+            font-size: 12px;
+            color: #555d72;
+        }
+
+        .version-info a {
+            color: #f5a623;
+            text-decoration: none;
+        }
+
+        .version-info a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <span class="logo-yt">YT</span><span class="logo-grab">Grab</span>
+            </div>
+            <div>
+                <div class="subtitle">Extension Settings</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <span class="section-icon">🔗</span>
+                <span class="section-title">Server Connection</span>
+            </div>
+            <div class="section-body">
+                <div class="form-group">
+                    <label class="form-label">Server Address</label>
+                    <input type="text" class="form-input" id="serverUrl" value="http://127.0.0.1:19850" placeholder="http://127.0.0.1:19850">
+                    <div class="form-hint">URL of the YTGrab desktop app server</div>
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-secondary" id="testConnection" style="width: 100%;">Test Connection</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <span class="section-icon">⚡</span>
+                <span class="section-title">Download Behavior</span>
+            </div>
+            <div class="section-body">
+                <div class="toggle-row">
+                    <div class="toggle-info">
+                        <div class="toggle-label">Auto-download on detection</div>
+                        <div class="toggle-desc">Automatically start download when video is detected</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="autoDownload">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="toggle-row">
+                    <div class="toggle-info">
+                        <div class="toggle-label">Show download button on videos</div>
+                        <div class="toggle-desc">Display download button overlay on video players</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="showButton" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="toggle-row">
+                    <div class="toggle-info">
+                        <div class="toggle-label">Show floating panel</div>
+                        <div class="toggle-desc">Display the YTGrab panel on video pages</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="showPanel" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="toggle-row">
+                    <div class="toggle-info">
+                        <div class="toggle-label">Show notifications</div>
+                        <div class="toggle-desc">Show toast notifications on actions</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="showNotifications" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <span class="section-icon">🌐</span>
+                <span class="section-title">Supported Platforms</span>
+            </div>
+            <div class="section-body">
+                <div class="platform-grid">
+                    <label class="platform-item">
+                        <input type="checkbox" name="platform" value="youtube" checked> YouTube
+                    </label>
+                    <label class="platform-item">
+                        <input type="checkbox" name="platform" value="instagram" checked> Instagram
+                    </label>
+                    <label class="platform-item">
+                        <input type="checkbox" name="platform" value="facebook" checked> Facebook
+                    </label>
+                    <label class="platform-item">
+                        <input type="checkbox" name="platform" value="twitter" checked> Twitter/X
+                    </label>
+                    <label class="platform-item">
+                        <input type="checkbox" name="platform" value="tiktok" checked> TikTok
+                    </label>
+                    <label class="platform-item">
+                        <input type="checkbox" name="platform" value="vimeo" checked> Vimeo
+                    </label>
+                    <label class="platform-item">
+                        <input type="checkbox" name="platform" value="dailymotion" checked> Dailymotion
+                    </label>
+                    <label class="platform-item">
+                        <input type="checkbox" name="platform" value="twitch" checked> Twitch
+                    </label>
+                    <label class="platform-item">
+                        <input type="checkbox" name="platform" value="reddit" checked> Reddit
+                    </label>
+                    <label class="platform-item">
+                        <input type="checkbox" name="platform" value="bilibili" checked> Bilibili
+                    </label>
+                    <label class="platform-item">
+                        <input type="checkbox" name="platform" value="soundcloud" checked> SoundCloud
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="btn-row">
+            <button class="btn btn-primary" id="saveSettings">Save Settings</button>
+            <button class="btn btn-secondary" id="resetSettings">Reset to Default</button>
+        </div>
+
+        <div class="status-message" id="statusMessage"></div>
+
+        <div class="version-info">
+            YTGrab Extension v2.0.0<br>
+            <a href="https://github.com/a7mdmo74/ytgrap" target="_blank">GitHub</a> · 
+            <a href="https://github.com/a7mdmo74/ytgrap/releases" target="_blank">Download App</a>
+        </div>
+    </div>
+
+    <script src="options.js"></script>
+</body>
+</html>

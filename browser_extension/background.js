@@ -1,11 +1,19 @@
-const LOCAL_SERVER = "http://127.0.0.1:19850";
+let serverUrl = "http://127.0.0.1:19850";
 let serverConnected = false;
 let detectedVideos = new Map();
+
+// Load settings on startup
+async function loadSettings() {
+    const stored = await chrome.storage.local.get('settings');
+    if (stored.settings?.serverUrl) {
+        serverUrl = stored.settings.serverUrl;
+    }
+}
 
 // Check server connection
 async function checkServer() {
     try {
-        const response = await fetch(`${LOCAL_SERVER}/ping`, {
+        const response = await fetch(`${serverUrl}/ping`, {
             method: "GET",
             signal: AbortSignal.timeout(2000)
         });
@@ -19,7 +27,7 @@ async function checkServer() {
 // Send video info to local server
 async function sendToServer(videoInfo) {
     try {
-        const response = await fetch(`${LOCAL_SERVER}/add`, {
+        const response = await fetch(`${serverUrl}/add`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(videoInfo)
@@ -33,7 +41,7 @@ async function sendToServer(videoInfo) {
 // Get download queue from server
 async function getQueue() {
     try {
-        const response = await fetch(`${LOCAL_SERVER}/queue`);
+        const response = await fetch(`${serverUrl}/queue`);
         if (response.ok) {
             return await response.json();
         }
@@ -43,6 +51,12 @@ async function getQueue() {
 
 // Listen for messages from content scripts
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.type === "SETTINGS_UPDATED") {
+        serverUrl = message.settings?.serverUrl || "http://127.0.0.1:19850";
+        checkServer();
+        sendResponse({ success: true });
+    }
+
     if (message.type === "VIDEO_DETECTED") {
         const videoId = generateVideoId(message.data);
         if (!detectedVideos.has(videoId)) {
@@ -52,11 +66,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 detectedAt: Date.now(),
                 tabId: sender.tab?.id
             });
-
-            // Update badge
             updateBadge();
-
-            // Try to send to server
             sendToServer(message.data).then(ok => {
                 if (ok) {
                     detectedVideos.get(videoId).sentToServer = true;
@@ -102,9 +112,11 @@ function updateBadge() {
     chrome.action.setBadgeBackgroundColor({ color: "#f5a623" });
 }
 
-// Periodically check server connection
-setInterval(checkServer, 5000);
-checkServer();
+// Initialize
+loadSettings().then(() => {
+    setInterval(checkServer, 5000);
+    checkServer();
+});
 
 // Handle tab updates to clear old video detections
 chrome.tabs.onRemoved.addListener((tabId) => {
