@@ -15,22 +15,29 @@ else:
     APP_DIR = os.path.dirname(os.path.abspath(__file__))
     ICO_PATH = os.path.join(APP_DIR, "ytgrab_icon.ico")
 
-# ── FFmpeg detection ────────────────────────────────────────────────────────
+# ── FFmpeg detection (cross-platform) ──────────────────────────────────────
 def _find_ffmpeg():
+    ffmpeg_name = "ffmpeg.exe" if sys.platform == "win32" else "ffmpeg"
     candidates = []
     if getattr(sys, 'frozen', False):
         _internal = os.path.join(APP_DIR, "_internal")
         candidates.append(os.path.join(_internal, "ffmpeg_bin"))
         candidates.append(os.path.join(APP_DIR, "ffmpeg_bin"))
-    winget_base = os.path.join(os.environ.get("LOCALAPPDATA", ""), "Microsoft", "WinGet", "Packages")
-    if os.path.isdir(winget_base):
-        for d in os.listdir(winget_base):
-            if "ffmpeg" in d.lower():
-                for sub in os.listdir(os.path.join(winget_base, d)):
-                    candidates.append(os.path.join(winget_base, d, sub, "bin"))
-    candidates.append(r"C:\ffmpeg\bin")
+    if sys.platform == "win32":
+        winget_base = os.path.join(os.environ.get("LOCALAPPDATA", ""), "Microsoft", "WinGet", "Packages")
+        if os.path.isdir(winget_base):
+            for d in os.listdir(winget_base):
+                if "ffmpeg" in d.lower():
+                    for sub in os.listdir(os.path.join(winget_base, d)):
+                        candidates.append(os.path.join(winget_base, d, sub, "bin"))
+        candidates.append(r"C:\ffmpeg\bin")
+    else:
+        import shutil
+        path_ffmpeg = shutil.which("ffmpeg")
+        if path_ffmpeg:
+            return os.path.dirname(path_ffmpeg)
     for p in candidates:
-        if os.path.isdir(p) and os.path.isfile(os.path.join(p, "ffmpeg.exe")):
+        if os.path.isdir(p) and os.path.isfile(os.path.join(p, ffmpeg_name)):
             return p
     return ""
 
@@ -854,7 +861,11 @@ By Ahmed Amer"""
             pass
 
 
-if __name__ == "__main__":
+def main():
     root = tk.Tk()
     app  = YouTubeDownloader(root)
     root.mainloop()
+
+
+if __name__ == "__main__":
+    main()

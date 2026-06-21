@@ -2,6 +2,8 @@
 
 A YouTube video and playlist downloader with a modern IDM-inspired dark UI.
 
+Works on **Windows**, **macOS**, and **Linux**.
+
 ## Features
 
 - Download YouTube videos in multiple qualities (up to 4K)
@@ -13,30 +15,38 @@ A YouTube video and playlist downloader with a modern IDM-inspired dark UI.
 
 ## Prerequisites
 
-FFmpeg is required. Install it via:
+- **Python 3.10+**
+- **FFmpeg**
 
-```bash
-winget install Gyan.FFmpeg
-```
+### Install FFmpeg
+
+| Platform | Command |
+|----------|---------|
+| Windows | `winget install Gyan.FFmpeg` |
+| macOS | `brew install ffmpeg` |
+| Linux | `sudo apt install ffmpeg` |
 
 ## Installation
 
-### Download
-
-Download the latest release from [GitHub Releases](https://github.com/a7mdmo74/ytgrap/releases).
-
-Extract the zip and run `install.bat` as administrator.
-
-### Build from source
-
-Requires Python 3.10+ and FFmpeg.
+### Option 1: Run from source (all platforms)
 
 ```bash
-pip install yt-dlp pyinstaller
-pyinstaller YTGrab.spec
+git clone https://github.com/a7mdmo74/ytgrap.git
+cd ytgrap
+pip install -r requirements.txt
+python youtube_downloader.py
 ```
 
-The built executable will be in `dist/YTGrab/`.
+### Option 2: Install via pip
+
+```bash
+pip install git+https://github.com/a7mdmo74/ytgrap.git
+ytgrab
+```
+
+### Option 3: Windows installer
+
+Download the latest release from [GitHub Releases](https://github.com/a7mdmo74/ytgrap/releases), extract, and run `install.bat` as administrator.
 
 ## Usage
 
@@ -45,10 +55,6 @@ The built executable will be in `dist/YTGrab/`.
 3. Select a quality from the dropdown
 4. Choose a save location (default: Downloads)
 5. Click **Start Download**
-
-## Uninstall
-
-Run `uninstall.bat` to remove the installation and shortcuts.
 
 ## License
 

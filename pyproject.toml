@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "ytgrab"
+version = "1.0.0"
+description = "YouTube video and playlist downloader with a modern dark UI"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+dependencies = [
+    "yt-dlp",
+]
+
+[project.scripts]
+ytgrab = "youtube_downloader:main"
+
+[tool.setuptools]
+py-modules = ["youtube_downloader"]
