@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 320px;
+            min-height: 200px;
+            background: #1c1f26;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #e8eaf0;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 16px;
+            background: #141720;
+            border-bottom: 1px solid #2e3340;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .logo-yt { color: #ef4444; }
+        .logo-grab { color: #f5a623; }
+
+        .title {
+            font-size: 14px;
+            color: #8890a4;
+        }
+
+        .status {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-dot.connected { background: #22c55e; }
+        .status-dot.disconnected { background: #ef4444; }
+
+        .content {
+            padding: 16px;
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: #8890a4;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .video-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .video-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: #22262f;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .video-item:hover {
+            background: #2a2f3a;
+        }
+
+        .video-thumb {
+            width: 48px;
+            height: 36px;
+            background: #141720;
+            border-radius: 4px;
+            object-fit: cover;
+        }
+
+        .video-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .video-title {
+            font-size: 12px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .video-platform {
+            font-size: 10px;
+            color: #f5a623;
+        }
+
+        .video-download-btn {
+            padding: 6px 12px;
+            background: linear-gradient(180deg, #f5a623 0%, #d4891a 100%);
+            color: #1c1f26;
+            border: none;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .video-download-btn:hover {
+            background: linear-gradient(180deg, #ffb840 0%, #f5a623 100%);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 20px;
+            color: #555d72;
+            font-size: 13px;
+        }
+
+        .empty-state-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(180deg, #f5a623 0%, #d4891a 100%);
+            color: #1c1f26;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(180deg, #ffb840 0%, #f5a623 100%);
+        }
+
+        .btn-secondary {
+            background: #2e3340;
+            color: #e8eaf0;
+        }
+
+        .btn-secondary:hover {
+            background: #3a3f50;
+        }
+
+        .download-app-link {
+            display: block;
+            text-align: center;
+            padding: 10px;
+            margin-top: 12px;
+            background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .download-app-link:hover {
+            background: linear-gradient(180deg, #4ade80 0%, #22c55e 100%);
+        }
+
+        .footer {
+            padding: 12px 16px;
+            background: #141720;
+            border-top: 1px solid #2e3340;
+            font-size: 10px;
+            color: #555d72;
+            text-align: center;
+        }
+
+        .footer a {
+            color: #f5a623;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <span class="logo-yt">YT</span><span class="logo-grab">Grab</span>
+        </div>
+        <div class="title">Video Downloader</div>
+        <div class="status">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="statusText">Checking...</span>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="section-title">Detected Videos</div>
+        <div class="video-list" id="videoList">
+            <div class="empty-state">
+                <div class="empty-state-icon">🎬</div>
+                <div>No videos detected yet.<br>Browse YouTube or social media to detect videos.</div>
+            </div>
+        </div>
+
+        <div class="btn-row">
+            <button class="btn btn-primary" id="refreshBtn">Refresh</button>
+            <button class="btn btn-secondary" id="settingsBtn">Settings</button>
+        </div>
+
+        <a href="https://github.com/a7mdmo74/ytgrap/releases" target="_blank" class="download-app-link">
+            ⬇ Download YTGrab App
+        </a>
+    </div>
+
+    <div class="footer">
+        YTGrab v2.0.0 — Like IDM for videos<br>
+        <a href="https://github.com/a7mdmo74/ytgrap" target="_blank">GitHub</a> · 
+        <a href="https://github.com/a7mdmo74/ytgrap/releases" target="_blank">Releases</a>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

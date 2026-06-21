@@ -1,0 +1,197 @@
+.ytgrab-download-container {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 999999;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.video-container:hover .ytgrab-download-container,
+.ytgrab-download-container:hover {
+    opacity: 1;
+}
+
+.ytgrab-download-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: linear-gradient(180deg, #f5a623 0%, #d4891a 100%);
+    color: #1c1f26;
+    border: none;
+    border-radius: 6px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease;
+}
+
+.ytgrab-download-btn:hover {
+    background: linear-gradient(180deg, #ffb840 0%, #f5a623 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(245, 166, 35, 0.4);
+}
+
+.ytgrab-download-btn:active {
+    transform: translateY(0);
+}
+
+.ytgrab-download-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Floating panel (IDM-style) */
+#ytgrab-panel {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    width: 200px;
+    background: #1c1f26;
+    border: 1px solid #2e3340;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    z-index: 2147483647;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow: hidden;
+}
+
+.ytgrab-panel-header {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 12px;
+    background: #141720;
+    cursor: move;
+    user-select: none;
+}
+
+.ytgrab-logo {
+    color: #ef4444;
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.ytgrab-title {
+    color: #f5a623;
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.ytgrab-status {
+    margin-left: auto;
+    font-size: 10px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.ytgrab-panel-content {
+    padding: 12px;
+}
+
+.ytgrab-panel-item {
+    display: flex;
+    justify-content: space-between;
+    color: #8890a4;
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+.ytgrab-panel-item span:last-child {
+    color: #f5a623;
+    font-weight: 600;
+}
+
+.ytgrab-video-title {
+    font-size: 11px;
+    color: #555d72;
+    margin-bottom: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+}
+
+.ytgrab-panel-btn {
+    width: 100%;
+    padding: 8px;
+    background: linear-gradient(180deg, #f5a623 0%, #d4891a 100%);
+    color: #1c1f26;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ytgrab-panel-btn:hover {
+    background: linear-gradient(180deg, #ffb840 0%, #f5a623 100%);
+}
+
+/* Notifications */
+.ytgrab-notification {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 2147483647;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.ytgrab-notification.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+.ytgrab-success {
+    background: #22c55e;
+    color: #fff;
+}
+
+.ytgrab-error {
+    background: #ef4444;
+    color: #fff;
+}
+
+/* YouTube-specific adjustments */
+html:not(.ytd-app) .ytgrab-download-container {
+    display: none;
+}
+
+/* Twitch chat videos */
+.chat-video__container .ytgrab-download-container {
+    top: 5px;
+    right: 5px;
+}
+
+/* Reddit video player */
+.reddit-video-player .ytgrab-download-container {
+    top: 5px;
+    right: 5px;
+}
+
+/* TikTok specific */
+[data-e2e="video-player"] .ytgrab-download-container {
+    top: 50px;
+    right: 10px;
+}
+
+/* Instagram Reels */
+.x1lliihq .ytgrab-download-container {
+    top: 50px;
+    right: 10px;
+}

@@ -5,6 +5,10 @@ import threading
 import os
 import sys
 import time
+import json
+import uuid
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from collections import deque
 
 # ── Frozen (exe) support ─────────────────────────────────────────────────────
 if getattr(sys, 'frozen', False):
@@ -44,19 +48,19 @@ def _find_ffmpeg():
 FFMPEG_DIR = _find_ffmpeg()
 
 # ── Palette (IDM-inspired: dark steel, amber accent, clean chrome) ──────────
-BG          = "#1c1f26"       # deep charcoal body
-SIDEBAR_BG  = "#141720"       # slightly darker left rail
-PANEL_BG    = "#22262f"       # card / panel surface
-TOOLBAR_BG  = "#191d24"       # top toolbar strip
-INPUT_BG    = "#0f1117"       # input fields
-BORDER      = "#2e3340"       # subtle border
-BORDER_LT   = "#3a3f50"       # lighter border / separator
+BG          = "#1c1f26"
+SIDEBAR_BG  = "#141720"
+PANEL_BG    = "#22262f"
+TOOLBAR_BG  = "#191d24"
+INPUT_BG    = "#0f1117"
+BORDER      = "#2e3340"
+BORDER_LT   = "#3a3f50"
 
-ACCENT      = "#f5a623"       # IDM amber / orange
-ACCENT_DK   = "#d4891a"       # pressed amber
-ACCENT_GLOW = "#f5a62340"     # semi-transparent glow
+ACCENT      = "#f5a623"
+ACCENT_DK   = "#d4891a"
+ACCENT_GLOW = "#f5a62340"
 
-BLUE        = "#3b82f6"       # info / progress fill
+BLUE        = "#3b82f6"
 BLUE_LT     = "#60a5fa"
 
 GREEN       = "#22c55e"
@@ -64,16 +68,144 @@ GREEN_DK    = "#16a34a"
 RED         = "#ef4444"
 RED_DK      = "#dc2626"
 
-TEXT        = "#e8eaf0"       # primary text
-TEXT_DIM    = "#8890a4"       # secondary / muted
-TEXT_TINY   = "#555d72"       # very dim labels
+TEXT        = "#e8eaf0"
+TEXT_DIM    = "#8890a4"
+TEXT_TINY   = "#555d72"
 
 MONO        = "Consolas"
 UI_FONT     = "Segoe UI"
 
+SERVER_PORT = 19850
 
+# ── Global download queue ───────────────────────────────────────────────────
+class DownloadQueue:
+    def __init__(self):
+        self.queue = deque()
+        self.history = []
+        self.lock = threading.Lock()
+        self._on_change = None
+
+    def set_callback(self, callback):
+        self._on_change = callback
+
+    def add(self, item):
+        with self.lock:
+            item["id"] = str(uuid.uuid4())[:8]
+            item["status"] = "queued"
+            item["added_at"] = time.time()
+            self.queue.append(item)
+            if self._on_change:
+                self._on_change()
+        return item
+
+    def get_next(self):
+        with self.lock:
+            if self.queue:
+                item = self.queue.popleft()
+                item["status"] = "downloading"
+                return item
+        return None
+
+    def mark_done(self, item):
+        with self.lock:
+            item["status"] = "completed"
+            item["completed_at"] = time.time()
+            self.history.append(item)
+            if self._on_change:
+                self._on_change()
+
+    def mark_error(self, item, error):
+        with self.lock:
+            item["status"] = "error"
+            item["error"] = str(error)
+            self.history.append(item)
+            if self._on_change:
+                self._on_change()
+
+    def get_all(self):
+        with self.lock:
+            return list(self.queue) + list(self.history[-20:])
+
+    def clear_history(self):
+        with self.lock:
+            self.history.clear()
+            if self._on_change:
+                self._on_change()
+
+download_queue = DownloadQueue()
+
+# ── Local HTTP Server ───────────────────────────────────────────────────────
+class RequestHandler(BaseHTTPRequestHandler):
+    app = None
+
+    def log_message(self, format, *args):
+        pass
+
+    def _send_json(self, data, status=200):
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.end_headers()
+        self.wfile.write(json.dumps(data).encode())
+
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.end_headers()
+
+    def do_GET(self):
+        if self.path == "/ping":
+            self._send_json({"status": "ok", "version": "1.0.0"})
+        elif self.path == "/queue":
+            items = download_queue.get_all()
+            self._send_json({"queue": items})
+        elif self.path == "/status":
+            queue_size = len(download_queue.queue)
+            self._send_json({
+                "status": "ready",
+                "queue_size": queue_size,
+                "ffmpeg": bool(FFMPEG_DIR)
+            })
+        else:
+            self._send_json({"error": "not found"}, 404)
+
+    def do_POST(self):
+        content_length = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(content_length)
+
+        try:
+            data = json.loads(body)
+        except json.JSONDecodeError:
+            self._send_json({"error": "invalid json"}, 400)
+            return
+
+        if self.path == "/add":
+            item = download_queue.add(data)
+            if self.app:
+                self.app.root.after(0, lambda: self.app._update_queue_display())
+            self._send_json({"success": True, "id": item["id"]})
+        elif self.path == "/download":
+            item = download_queue.add(data)
+            if self.app:
+                self.app.root.after(0, lambda: self.app._update_queue_display())
+                self.app.root.after(100, lambda: self.app._start_next_download())
+            self._send_json({"success": True, "id": item["id"]})
+        else:
+            self._send_json({"error": "not found"}, 404)
+
+def start_server(app):
+    RequestHandler.app = app
+    server = HTTPServer(("127.0.0.1", SERVER_PORT), RequestHandler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    return server
+
+# ── IDM Button ──────────────────────────────────────────────────────────────
 class IDMButton(tk.Canvas):
-    """Flat button with gradient-style highlight bar on top (IDM look)."""
     def __init__(self, parent, text, color, hover, command=None,
                  width=110, height=32, text_color="#ffffff", **kw):
         super().__init__(parent, width=width, height=height,
@@ -96,13 +228,9 @@ class IDMButton(tk.Canvas):
         self.delete("all")
         r = 4
         w, h = self._bw, self._bh
-        # body
         self._rounded_rect(2, 2, w-2, h-2, r, fill=color, outline="")
-        # top shine strip
         self._rounded_rect(2, 2, w-2, h//2, r, fill=self._lighten(color, 30), outline="")
-        # bottom border shade
         self.create_rectangle(2, h-3, w-2, h-2, fill=self._darken(color, 40), outline="")
-        # text
         self.create_text(w//2, h//2, text=self._text,
                          font=(UI_FONT, 9, "bold"), fill=self._tc)
 
@@ -163,19 +291,17 @@ class Tooltip:
             self.tw = None
 
 
-class YouTubeDownloader:
+class YTGrabApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("YTGrab  —  Download Manager  ·  by Ahmed Amer")
-        self.root.geometry("820x640")
+        self.root.title("YTGrab  —  IDM-Style Download Manager  ·  by Ahmed Amer")
+        self.root.geometry("920x720")
         self.root.resizable(False, False)
         self.root.configure(bg=BG)
 
-        # Set window icon
         if os.path.exists(ICO_PATH):
             self.root.iconbitmap(ICO_PATH)
 
-        # apply ttk theme early
         self._setup_ttk_styles()
 
         self.output_dir      = os.path.join(os.path.expanduser("~"), "Downloads")
@@ -184,18 +310,21 @@ class YouTubeDownloader:
         self.playlist_entries= []
         self._dl_start_time  = None
         self._speed_samples  = []
-        self._build_ui()
+        self._is_downloading = False
+        self._current_item   = None
 
-    # ── TTK styles ────────────────────────────────────────────────────────────
+        download_queue.set_callback(lambda: self.root.after(0, self._update_queue_display))
+
+        self._build_ui()
+        self._start_server()
+
     def _setup_ttk_styles(self):
         st = ttk.Style()
         st.theme_use("clam")
-        # Progress bar — amber fill, dark trough
         st.configure("IDM.Horizontal.TProgressbar",
                      troughcolor=INPUT_BG, background=ACCENT,
                      lightcolor=ACCENT, darkcolor=ACCENT_DK,
                      bordercolor=BORDER, thickness=18)
-        # Combobox
         st.configure("IDM.TCombobox",
                      fieldbackground=INPUT_BG, background=PANEL_BG,
                      foreground=TEXT, selectbackground=ACCENT,
@@ -205,13 +334,11 @@ class YouTubeDownloader:
                fieldbackground=[("readonly", INPUT_BG)],
                foreground=[("readonly", TEXT)],
                selectbackground=[("readonly", ACCENT)])
-        # Scrollbar
         st.configure("Dark.Vertical.TScrollbar",
                      background=PANEL_BG, troughcolor=INPUT_BG,
                      arrowcolor=TEXT_DIM, bordercolor=BORDER,
                      darkcolor=PANEL_BG, lightcolor=PANEL_BG)
 
-    # ── Main UI ───────────────────────────────────────────────────────────────
     def _build_ui(self):
         root = self.root
 
@@ -220,19 +347,23 @@ class YouTubeDownloader:
         toolbar.pack(fill="x")
         toolbar.pack_propagate(False)
 
-        # Logo zone
         logo_frame = tk.Frame(toolbar, bg=TOOLBAR_BG)
         logo_frame.pack(side="left", padx=(16, 0))
         tk.Label(logo_frame, text="YT", font=(UI_FONT, 16, "bold"),
                  fg=RED, bg=TOOLBAR_BG).pack(side="left")
         tk.Label(logo_frame, text="Grab", font=(UI_FONT, 16, "bold"),
                  fg=ACCENT, bg=TOOLBAR_BG).pack(side="left")
-        tk.Label(logo_frame, text="  Download Manager",
+        tk.Label(logo_frame, text="  IDM-Style Download Manager",
                  font=(UI_FONT, 9), fg=TEXT_DIM, bg=TOOLBAR_BG).pack(side="left", pady=(4,0))
 
-        # Toolbar buttons (right side)
         btn_frame = tk.Frame(toolbar, bg=TOOLBAR_BG)
         btn_frame.pack(side="right", padx=16)
+
+        self.server_status_var = tk.StringVar(value="● Server Starting...")
+        self.server_status_label = tk.Label(btn_frame, textvariable=self.server_status_var,
+                                            font=(UI_FONT, 9), fg="#facc15", bg=TOOLBAR_BG)
+        self.server_status_label.pack(side="left", padx=(0, 12))
+
         for label, tip, cmd in [
             ("⚙ Settings", "Download settings", self._open_settings),
             ("? Help",     "How to use",         self._open_help),
@@ -245,10 +376,9 @@ class YouTubeDownloader:
             b.bind("<Leave>",    lambda e, w=b: w.config(fg=TEXT_DIM))
             Tooltip(b, tip)
 
-        # Separator
         tk.Frame(root, bg=BORDER, height=1).pack(fill="x")
 
-        # ── URL bar (IDM-style add-download row) ──────────────────────
+        # ── URL bar ──────────────────────────────────────────────────
         url_panel = tk.Frame(root, bg=PANEL_BG, pady=10)
         url_panel.pack(fill="x", padx=0)
 
@@ -261,7 +391,6 @@ class YouTubeDownloader:
         url_row = tk.Frame(inner, bg=PANEL_BG)
         url_row.pack(fill="x")
 
-        # URL entry with left icon
         entry_frame = tk.Frame(url_row, bg=INPUT_BG,
                                highlightthickness=1, highlightbackground=BORDER)
         entry_frame.pack(side="left", fill="x", expand=True)
@@ -281,8 +410,7 @@ class YouTubeDownloader:
                                    command=self.fetch_formats, width=120, height=36)
         self.fetch_btn.pack(side="right", padx=(10,0))
 
-        # Video info label
-        self.info_var = tk.StringVar(value="Paste a URL and press Fetch  ·  Supports videos and playlists")
+        self.info_var = tk.StringVar(value="Paste a URL and press Fetch  ·  Or install browser extension for auto-detection")
         info_row = tk.Frame(inner, bg=PANEL_BG)
         info_row.pack(fill="x", pady=(6,0))
         self.info_icon = tk.Label(info_row, text="●", font=(UI_FONT, 8),
@@ -293,18 +421,21 @@ class YouTubeDownloader:
 
         tk.Frame(root, bg=BORDER, height=1).pack(fill="x")
 
-        # ── Middle section: Quality + Save-to side by side ────────────
-        mid = tk.Frame(root, bg=BG)
-        mid.pack(fill="x", padx=16, pady=10)
+        # ── Main content area (side by side) ─────────────────────────
+        main_content = tk.Frame(root, bg=BG)
+        main_content.pack(fill="both", expand=True, padx=16, pady=8)
+
+        # Left panel: Quality + Download controls
+        left_panel = tk.Frame(main_content, bg=BG)
+        left_panel.pack(side="left", fill="both", expand=True, padx=(0,8))
 
         # Quality block
-        q_block = self._panel(mid, "QUALITY / FORMAT")
-        q_block.pack(side="left", fill="x", expand=True, padx=(0,8))
+        q_block = self._panel(left_panel, "QUALITY / FORMAT")
+        q_block.pack(fill="x", pady=(0,8))
 
         q_inner = tk.Frame(q_block, bg=PANEL_BG)
         q_inner.pack(fill="x", padx=10, pady=(0,10))
 
-        # small icon + combobox
         tk.Label(q_inner, text="🎬", font=(UI_FONT, 11), bg=PANEL_BG, fg=ACCENT).pack(side="left")
         self.quality_cb   = tk.StringVar()
         self.quality_menu = ttk.Combobox(q_inner, textvariable=self.quality_cb,
@@ -314,8 +445,8 @@ class YouTubeDownloader:
         self.quality_menu.bind("<<ComboboxSelected>>", lambda e: self._on_quality_change())
 
         # Save-to block
-        s_block = self._panel(mid, "SAVE TO")
-        s_block.pack(side="right", fill="x", expand=True, padx=(8,0))
+        s_block = self._panel(left_panel, "SAVE TO")
+        s_block.pack(fill="x", pady=(0,8))
 
         s_inner = tk.Frame(s_block, bg=PANEL_BG)
         s_inner.pack(fill="x", padx=10, pady=(0,10))
@@ -334,17 +465,13 @@ class YouTubeDownloader:
         IDMButton(s_inner, " Browse ", BLUE, BLUE_LT,
                   command=self.browse_dir, width=88, height=36).pack(side="right", padx=(8,0))
 
-        tk.Frame(root, bg=BORDER, height=1).pack(fill="x")
+        # Progress / Status
+        prog_panel = self._panel(left_panel, "DOWNLOAD PROGRESS")
+        prog_panel.pack(fill="x", pady=(0,8))
 
-        # ── Progress / Status panel (IDM-style chunked info) ──────────
-        prog_panel = tk.Frame(root, bg=PANEL_BG, pady=12)
-        prog_panel.pack(fill="x")
-
-        # Status row
         stat_top = tk.Frame(prog_panel, bg=PANEL_BG)
-        stat_top.pack(fill="x", padx=16, pady=(0,6))
+        stat_top.pack(fill="x", padx=10, pady=(0,6))
 
-        # Status dot + label
         self.dot_canvas = tk.Canvas(stat_top, width=12, height=12,
                                     bg=PANEL_BG, highlightthickness=0)
         self.dot_canvas.pack(side="left", pady=(2,0))
@@ -354,7 +481,6 @@ class YouTubeDownloader:
         tk.Label(stat_top, textvariable=self.status_var,
                  font=(UI_FONT, 9, "bold"), fg=TEXT, bg=PANEL_BG).pack(side="left", padx=(6,0))
 
-        # Speed / Size / ETA info chips (right side)
         chips_frame = tk.Frame(stat_top, bg=PANEL_BG)
         chips_frame.pack(side="right")
 
@@ -377,32 +503,67 @@ class YouTubeDownloader:
             tk.Label(chip, textvariable=var, font=(MONO, 9, "bold"),
                      fg=ACCENT, bg=INPUT_BG, width=9).pack(padx=4, pady=(0,3))
 
-        # Progress bar  — IDM shows a SEGMENTED bar with % label inside
         prog_wrap = tk.Frame(prog_panel, bg=PANEL_BG)
-        prog_wrap.pack(fill="x", padx=16, pady=(0,4))
+        prog_wrap.pack(fill="x", padx=10, pady=(0,10))
 
         self.progress = ttk.Progressbar(prog_wrap, mode="determinate",
                                          style="IDM.Horizontal.TProgressbar")
         self.progress.pack(fill="x", ipady=2)
 
-        # ── Download button row ────────────────────────────────────────
-        tk.Frame(root, bg=BORDER, height=1).pack(fill="x")
-        dl_row = tk.Frame(root, bg=BG, pady=10)
-        dl_row.pack(fill="x", padx=16)
+        # Download buttons
+        dl_row = tk.Frame(left_panel, bg=BG)
+        dl_row.pack(fill="x", pady=(0,4))
 
         self.dl_btn = IDMButton(dl_row, "  ⬇  START DOWNLOAD  ", ACCENT, ACCENT_DK,
-                                command=self.start_download, width=220, height=40,
+                                command=self.start_download, width=200, height=40,
                                 text_color=BG)
         self.dl_btn.pack(side="left")
 
         self.cancel_btn = IDMButton(dl_row, " ✖ Cancel ", RED, RED_DK,
-                                    command=self._cancel, width=100, height=40)
+                                    command=self._cancel, width=90, height=40)
         self.cancel_btn.pack(side="left", padx=(10,0))
 
-        tk.Label(dl_row, text="Select quality, pick destination, then click Start Download",
-                 font=(UI_FONT, 8), fg=TEXT_TINY, bg=BG).pack(side="right")
+        # Right panel: Browser Queue
+        right_panel = tk.Frame(main_content, bg=BG, width=280)
+        right_panel.pack(side="right", fill="y")
+        right_panel.pack_propagate(False)
 
-        # ── Log panel ─────────────────────────────────────────────────
+        queue_block = self._panel(right_panel, "BROWSER QUEUE")
+        queue_block.pack(fill="both", expand=True)
+
+        queue_header = tk.Frame(queue_block, bg=PANEL_BG)
+        queue_header.pack(fill="x", padx=10, pady=(8,4))
+
+        self.queue_count_var = tk.StringVar(value="0 items")
+        tk.Label(queue_header, textvariable=self.queue_count_var,
+                 font=(UI_FONT, 8), fg=TEXT_DIM, bg=PANEL_BG).pack(side="left")
+
+        clear_hist_btn = tk.Label(queue_header, text="Clear History", font=(UI_FONT, 8),
+                                   fg=ACCENT, bg=PANEL_BG, cursor="hand2")
+        clear_hist_btn.pack(side="right")
+        clear_hist_btn.bind("<Button-1>", lambda e: self._clear_queue_history())
+
+        queue_frame = tk.Frame(queue_block, bg=PANEL_BG)
+        queue_frame.pack(fill="both", expand=True, padx=10, pady=(0,10))
+
+        self.queue_canvas = tk.Canvas(queue_frame, bg=PANEL_BG, highlightthickness=0)
+        queue_sb = ttk.Scrollbar(queue_frame, command=self.queue_canvas.yview,
+                                  style="Dark.Vertical.TScrollbar")
+        self.queue_canvas.configure(yscrollcommand=queue_sb.set)
+        queue_sb.pack(side="right", fill="y")
+        self.queue_canvas.pack(fill="both", expand=True)
+
+        self.queue_inner = tk.Frame(self.queue_canvas, bg=PANEL_BG)
+        self.queue_canvas_window = self.queue_canvas.create_window(
+            (0, 0), window=self.queue_inner, anchor="nw"
+        )
+        self.queue_canvas.bind("<Configure>", lambda e: self.queue_canvas.configure(
+            scrollregion=self.queue_canvas.bbox("all")
+        ))
+
+        self._update_queue_display()
+
+        # ── Bottom log ───────────────────────────────────────────────
         tk.Frame(root, bg=BORDER, height=1).pack(fill="x")
         log_header = tk.Frame(root, bg=SIDEBAR_BG, pady=4)
         log_header.pack(fill="x")
@@ -413,8 +574,9 @@ class YouTubeDownloader:
         self._clear_btn.pack(side="right")
         self._clear_btn.bind("<Button-1>", lambda e: self._clear_log())
 
-        log_body = tk.Frame(root, bg=SIDEBAR_BG)
-        log_body.pack(fill="both", expand=True, padx=0, pady=0)
+        log_body = tk.Frame(root, bg=SIDEBAR_BG, height=100)
+        log_body.pack(fill="x")
+        log_body.pack_propagate(False)
 
         self.log_text = tk.Text(log_body, bg=SIDEBAR_BG, fg=TEXT_DIM,
                                 font=(MONO, 8), wrap="word", state="disabled",
@@ -427,21 +589,17 @@ class YouTubeDownloader:
         sb.pack(side="right", fill="y")
         self.log_text.pack(fill="both", expand=True)
 
-        # colour tags for log
         self.log_text.tag_configure("ok",    foreground=GREEN)
         self.log_text.tag_configure("err",   foreground=RED)
         self.log_text.tag_configure("info",  foreground=ACCENT)
         self.log_text.tag_configure("dim",   foreground=TEXT_TINY)
 
-    # ── Helper widgets ────────────────────────────────────────────────────────
     def _panel(self, parent, title):
         wrap = tk.Frame(parent, bg=PANEL_BG,
                         highlightthickness=1, highlightbackground=BORDER)
-        # title bar strip
         title_bar = tk.Frame(wrap, bg=BORDER, height=24)
         title_bar.pack(fill="x")
         title_bar.pack_propagate(False)
-        # amber left accent bar
         tk.Frame(title_bar, bg=ACCENT, width=3).pack(side="left", fill="y")
         tk.Label(title_bar, text=f"  {title}", font=(UI_FONT, 7, "bold"),
                  fg=TEXT_DIM, bg=BORDER).pack(side="left", pady=2)
@@ -456,7 +614,6 @@ class YouTubeDownloader:
         self.log_text.delete("1.0", "end")
         self.log_text.configure(state="disabled")
 
-    # ── Logging ───────────────────────────────────────────────────────────────
     def log(self, msg, tag=""):
         ts  = time.strftime("%H:%M:%S")
         self.log_text.configure(state="normal")
@@ -464,6 +621,175 @@ class YouTubeDownloader:
         self.log_text.insert("end", msg + "\n", tag or "")
         self.log_text.see("end")
         self.log_text.configure(state="disabled")
+
+    # ── Server ────────────────────────────────────────────────────────────────
+    def _start_server(self):
+        try:
+            start_server(self)
+            self.server_status_var.set("● Server Running (port 19850)")
+            self.server_status_label.config(fg=GREEN)
+            self.log("Local server started on port 19850 — Browser extension ready", "ok")
+        except Exception as e:
+            self.server_status_var.set("● Server Error")
+            self.server_status_label.config(fg=RED)
+            self.log(f"Server error: {e}", "err")
+
+    # ── Queue management ──────────────────────────────────────────────────────
+    def _update_queue_display(self):
+        for widget in self.queue_inner.winfo_children():
+            widget.destroy()
+
+        items = download_queue.get_all()
+        queued = [i for i in items if i.get("status") == "queued"]
+        active = [i for i in items if i.get("status") == "downloading"]
+        done = [i for i in items if i.get("status") in ("completed", "error")]
+
+        self.queue_count_var.set(f"{len(queued)} queued · {len(active)} active")
+
+        for item in active + queued:
+            self._add_queue_item(item, is_active=item.get("status") == "downloading")
+
+        for item in reversed(done[-10:]):
+            self._add_queue_item(item, is_done=True)
+
+        if not items:
+            tk.Label(self.queue_inner, text="No downloads yet.\n\n"
+                     "Install the browser extension to\ndetect videos automatically.",
+                     font=(UI_FONT, 9), fg=TEXT_TINY, bg=PANEL_BG,
+                     justify="center", pady=20).pack(fill="x")
+
+    def _add_queue_item(self, item, is_active=False, is_done=False):
+        frame = tk.Frame(self.queue_inner, bg=PANEL_BG)
+        frame.pack(fill="x", pady=2, padx=4)
+
+        if is_active:
+            status_color = "#facc15"
+            status_icon = "⏳"
+        elif is_done and item.get("status") == "completed":
+            status_color = GREEN
+            status_icon = "✔"
+        elif is_done and item.get("status") == "error":
+            status_color = RED
+            status_icon = "✖"
+        else:
+            status_color = TEXT_DIM
+            status_icon = "⏳"
+
+        header = tk.Frame(frame, bg=PANEL_BG)
+        header.pack(fill="x")
+
+        tk.Label(header, text=f"{status_icon}", font=(UI_FONT, 10),
+                 fg=status_color, bg=PANEL_BG).pack(side="left")
+
+        title = item.get("title", item.get("url", "Unknown"))
+        if len(title) > 28:
+            title = title[:25] + "..."
+        tk.Label(header, text=title, font=(UI_FONT, 8, "bold"),
+                 fg=TEXT, bg=PANEL_BG, anchor="w").pack(side="left", padx=4)
+
+        if is_active or (not is_done):
+            dl_btn = tk.Label(header, text="▶", font=(UI_FONT, 10),
+                              fg=ACCENT, bg=PANEL_BG, cursor="hand2")
+            dl_btn.pack(side="right")
+            dl_btn.bind("<Button-1>", lambda e, i=item: self._download_from_queue(i))
+
+        platform = item.get("platform", "")
+        if platform:
+            tk.Label(frame, text=platform.upper(), font=(UI_FONT, 7),
+                     fg=ACCENT, bg=PANEL_BG).pack(anchor="w", padx=20)
+
+    def _download_from_queue(self, item):
+        url = item.get("url")
+        if url:
+            self.url_entry.delete(0, "end")
+            self.url_entry.insert(0, url)
+            self.fetch_formats()
+
+    def _start_next_download(self):
+        if self._is_downloading:
+            return
+        item = download_queue.get_next()
+        if item:
+            self._current_item = item
+            self._is_downloading = True
+            url = item.get("url")
+            if url:
+                self.url_entry.delete(0, "end")
+                self.url_entry.insert(0, url)
+                self.root.after(100, lambda: self._auto_fetch_and_download(item))
+            else:
+                download_queue.mark_error(item, "No URL provided")
+                self._is_downloading = False
+                self._start_next_download()
+
+    def _auto_fetch_and_download(self, item):
+        url = item.get("url")
+        if not url:
+            download_queue.mark_error(item, "No URL")
+            self._is_downloading = False
+            self._start_next_download()
+            return
+
+        self.log(f"Auto-downloading from queue: {url[:50]}...", "info")
+        self.fetch_btn.config_state(False, "  ⏳ Fetching…  ")
+        self.info_var.set("Auto-fetching from browser queue…")
+        self.info_icon.config(fg="#facc15")
+        self._set_dot("#facc15")
+        self.status_var.set("Auto-fetching from queue…")
+
+        threading.Thread(target=self._auto_fetch_thread, args=(url, item), daemon=True).start()
+
+    def _auto_fetch_thread(self, url, item):
+        try:
+            ydl_opts = {"quiet": True, "no_warnings": True, "skip_download": True,
+                        "ffmpeg_location": FFMPEG_DIR,
+                        "extract_flat": False, "ignoreerrors": True}
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(url, download=False)
+
+            self.is_playlist = info.get("_type") == "playlist" or "entries" in info
+            entries = [e for e in info.get("entries", []) if e] if self.is_playlist else [info]
+            self.playlist_entries = entries
+            self.formats = []
+            seen = set()
+            sample = next((e for e in entries if e and e.get("formats")), None)
+            if sample:
+                for f in sample.get("formats", []):
+                    res    = f.get("height")
+                    fps    = f.get("fps", 30)
+                    ext    = f.get("ext", "")
+                    vcodec = f.get("vcodec", "none")
+                    if vcodec == "none" or not res:
+                        continue
+                    key = f"{res}_{fps}_{ext}"
+                    if key not in seen:
+                        seen.add(key)
+                        self.formats.append((f.get("format_id", ""), res, fps, ext))
+
+            self.formats.sort(key=lambda x: x[1], reverse=True)
+            self.formats.insert(0, ("bestvideo+bestaudio/best", 0, 0, ""))
+
+            title = info.get("title", "Unknown")
+            item["title"] = title
+
+            self.root.after(0, self._update_quality_dropdown)
+            self.root.after(0, lambda: self.fetch_btn.config_state(True, "  🔍 FETCH  "))
+            self.root.after(0, lambda: self._set_dot(GREEN))
+            self.root.after(0, lambda t=title: self.info_var.set(f"Auto: {t}"))
+            self.root.after(0, lambda: self.status_var.set("Ready — auto-downloading best quality"))
+            self.root.after(100, lambda: self._auto_start_download(url, item))
+
+        except Exception as e:
+            self.root.after(0, lambda err=e: download_queue.mark_error(item, str(err)))
+            self.root.after(0, lambda: self.fetch_btn.config_state(True, "  🔍 FETCH  "))
+            self.root.after(0, lambda: self._set_dot(RED))
+            self.root.after(0, lambda err=e: self.log(f"Auto-fetch error: {err}", "err"))
+            self.root.after(0, lambda: self._update_queue_display())
+            self._is_downloading = False
+            self.root.after(200, self._start_next_download)
+
+    def _auto_start_download(self, url, item):
+        self.start_download()
 
     # ── Actions ───────────────────────────────────────────────────────────────
     def browse_dir(self):
@@ -475,7 +801,7 @@ class YouTubeDownloader:
     def _open_settings(self):
         win = tk.Toplevel(self.root)
         win.title("Settings")
-        win.geometry("480x360")
+        win.geometry("480x400")
         win.configure(bg=PANEL_BG)
         win.resizable(False, False)
         win.transient(self.root)
@@ -484,9 +810,24 @@ class YouTubeDownloader:
         tk.Label(win, text="⚙  Settings", font=(UI_FONT, 14, "bold"),
                  fg=ACCENT, bg=PANEL_BG).pack(pady=(16, 12))
 
-        # Output format
+        tk.Label(win, text="Server Port: 19850", font=(UI_FONT, 10),
+                 fg=TEXT_DIM, bg=PANEL_BG).pack(anchor="w", padx=20, pady=4)
+
+        tk.Label(win, text="Install Browser Extension:", font=(UI_FONT, 10, "bold"),
+                 fg=TEXT, bg=PANEL_BG).pack(anchor="w", padx=20, pady=(12,4))
+
+        install_text = (
+            "1. Open Chrome and go to chrome://extensions\n"
+            "2. Enable 'Developer mode'\n"
+            "3. Click 'Load unpacked'\n"
+            "4. Select the browser_extension folder\n"
+            "5. YTGrab will detect videos automatically"
+        )
+        tk.Label(win, text=install_text, font=(UI_FONT, 9),
+                 fg=TEXT_DIM, bg=PANEL_BG, justify="left").pack(anchor="w", padx=20)
+
         fmt_frame = tk.Frame(win, bg=PANEL_BG)
-        fmt_frame.pack(fill="x", padx=20, pady=4)
+        fmt_frame.pack(fill="x", padx=20, pady=8)
         tk.Label(fmt_frame, text="Output format:", font=(UI_FONT, 10),
                  fg=TEXT, bg=PANEL_BG).pack(side="left")
         self._fmt_var = tk.StringVar(value="mp4")
@@ -496,7 +837,6 @@ class YouTubeDownloader:
                            selectcolor=INPUT_BG, activebackground=PANEL_BG,
                            activeforeground=ACCENT).pack(side="left", padx=8)
 
-        # Concurrent fragments
         cf_frame = tk.Frame(win, bg=PANEL_BG)
         cf_frame.pack(fill="x", padx=20, pady=8)
         tk.Label(cf_frame, text="Parallel fragments:", font=(UI_FONT, 10),
@@ -506,7 +846,6 @@ class YouTubeDownloader:
                    width=4, font=(UI_FONT, 10), bg=INPUT_BG, fg=TEXT,
                    buttonbackground=PANEL_BG, relief="flat").pack(side="left", padx=8)
 
-        # Retries
         rt_frame = tk.Frame(win, bg=PANEL_BG)
         rt_frame.pack(fill="x", padx=20, pady=8)
         tk.Label(rt_frame, text="Max retries:", font=(UI_FONT, 10),
@@ -516,7 +855,6 @@ class YouTubeDownloader:
                    width=4, font=(UI_FONT, 10), bg=INPUT_BG, fg=TEXT,
                    buttonbackground=PANEL_BG, relief="flat").pack(side="left", padx=8)
 
-        # Auto-clean
         self._clean_var = tk.BooleanVar(value=True)
         tk.Checkbutton(win, text="Auto-clean leftover .part / .temp files",
                        variable=self._clean_var, font=(UI_FONT, 10),
@@ -540,7 +878,7 @@ class YouTubeDownloader:
     def _open_help(self):
         win = tk.Toplevel(self.root)
         win.title("Help")
-        win.geometry("520x440")
+        win.geometry("560x520")
         win.configure(bg=PANEL_BG)
         win.resizable(False, False)
         win.transient(self.root)
@@ -549,31 +887,37 @@ class YouTubeDownloader:
         tk.Label(win, text="?  How to Use", font=(UI_FONT, 14, "bold"),
                  fg=ACCENT, bg=PANEL_BG).pack(pady=(16, 8))
 
-        help_text = """1.  Paste a YouTube video or playlist URL
-     into the URL field at the top.
+        help_text = """METHOD 1: Manual URL
 
-2.  Click "Fetch" to load available qualities.
-     Wait for the info to appear.
+1.  Paste a YouTube/social media URL
+2.  Click "Fetch" to load qualities
+3.  Select quality from dropdown
+4.  Click "Start Download"
 
-3.  Pick a quality from the dropdown.
-     "Best quality" auto-selects the highest.
+METHOD 2: Browser Extension (Like IDM!)
 
-4.  (Optional) Click "Browse" to change
-     the save location.
+1.  Open Chrome → chrome://extensions
+2.  Enable "Developer mode"
+3.  Click "Load unpacked"
+4.  Select the "browser_extension" folder
+5.  Browse YouTube, Instagram, TikTok, etc.
+6.  Click the download button on any video
+7.  Video appears in the Browser Queue
+8.  Click ▶ to start downloading
 
-5.  Click "Start Download" and wait.
-     Progress, speed, and ETA show live.
-
-6.  A popup will confirm when done.
-     The merged mp4 is saved to your folder.
+SUPPORTED PLATFORMS:
+ • YouTube, YouTube Music
+ • Instagram, Facebook
+ • Twitter/X, TikTok
+ • Vimeo, Dailymotion
+ • Twitch, Reddit
+ • Bilibili, SoundCloud
 
 TIPS:
- •  Playlists are auto-detected and
-     downloaded one by one.
- •  If a download fails, it retries
-     automatically.
- •  Use Settings (⚙) to change output
-     format to MKV or WebM.
+ • Server runs on port 19850
+ • Browser extension auto-detects videos
+ • Queue shows all detected videos
+ • Supports playlists and batches
 
 By Ahmed Amer"""
 
@@ -616,7 +960,6 @@ By Ahmed Amer"""
                   cursor="hand2", command=win.destroy).pack(side="left", padx=6)
 
     def _cancel(self):
-        # minimal cancel: just reset UI (yt-dlp thread is daemon, will die)
         self.status_var.set("Cancelled")
         self._set_dot(RED)
         self.log("Download cancelled by user.", "err")
@@ -624,6 +967,7 @@ By Ahmed Amer"""
         self.fetch_btn.config_state(True, "  🔍 FETCH  ")
         self.progress["value"] = 0
         self._reset_chips()
+        self._is_downloading = False
 
     def _reset_chips(self):
         self.speed_var.set("—")
@@ -639,11 +983,16 @@ By Ahmed Amer"""
             if res:
                 self.log(f"Quality selected: {res}p{fps}  [{ext.upper()}]", "info")
 
+    def _clear_queue_history(self):
+        download_queue.clear_history()
+        self._update_queue_display()
+        self.log("Queue history cleared.", "info")
+
     # ── Fetch ─────────────────────────────────────────────────────────────────
     def fetch_formats(self):
         url = self.url_entry.get().strip()
         if not url:
-            messagebox.showwarning("No URL", "Please enter a YouTube URL.")
+            messagebox.showwarning("No URL", "Please enter a URL.")
             return
         self.fetch_btn.config_state(False, "  ⏳ Fetching…  ")
         self.info_var.set("Contacting server…")
@@ -657,8 +1006,7 @@ By Ahmed Amer"""
         try:
             ydl_opts = {"quiet": True, "no_warnings": True, "skip_download": True,
                         "ffmpeg_location": FFMPEG_DIR,
-                        "extract_flat": False,
-                        "ignoreerrors": True}
+                        "extract_flat": False, "ignoreerrors": True}
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(url, download=False)
 
@@ -703,9 +1051,6 @@ By Ahmed Amer"""
             else:
                 self.log(f"Video: {len(self.formats)-1} quality options", "ok")
 
-            if self.is_playlist and len(self.formats) <= 1:
-                self.log("Playlist detected — using best quality for all videos", "info")
-
             self.root.after(0, self._update_quality_dropdown)
             self.root.after(0, lambda: self.fetch_btn.config_state(True, "  🔍 FETCH  "))
             self.root.after(0, lambda: self._set_dot(GREEN))
@@ -737,7 +1082,7 @@ By Ahmed Amer"""
     def start_download(self):
         url = self.url_entry.get().strip()
         if not url:
-            messagebox.showwarning("No URL", "Please enter a YouTube URL.")
+            messagebox.showwarning("No URL", "Please enter a URL.")
             return
         if not self.formats:
             messagebox.showwarning("Fetch first", "Click Fetch to load video info first.")
@@ -767,7 +1112,6 @@ By Ahmed Amer"""
             total = len(self.playlist_entries) if self.is_playlist else 1
             self.root.after(0, lambda: self.progress.configure(maximum=max(total*100, 100)))
 
-            # Clean leftover .part / .temp files in output dir
             if getattr(self, '_clean_var', None) is None or self._clean_var.get():
                 for f in os.listdir(self.output_dir):
                     if f.endswith(".part") or f.endswith(".temp.mp4"):
@@ -782,7 +1126,6 @@ By Ahmed Amer"""
                     speed   = d.get("_speed_str", "—").strip()
                     eta     = d.get("_eta_str", "—").strip()
                     down    = d.get("_downloaded_bytes_str", "—").strip()
-                    # strip ANSI codes if any
                     import re
                     pct_raw = re.sub(r'\x1b\[[0-9;]*m', '', pct_raw)
                     speed   = re.sub(r'\x1b\[[0-9;]*m', '', speed)
@@ -835,6 +1178,10 @@ By Ahmed Amer"""
                 else:
                     ydl.download([url])
 
+            if self._current_item:
+                download_queue.mark_done(self._current_item)
+                self._current_item = None
+
             self.root.after(0, lambda: self.status_var.set("Download Complete  ✔"))
             self.root.after(0, lambda: self._set_dot(GREEN))
             self.root.after(0, lambda: self.progress.configure(value=self.progress["maximum"]))
@@ -843,12 +1190,18 @@ By Ahmed Amer"""
             self.root.after(0, self._show_done_dialog)
 
         except Exception as e:
+            if self._current_item:
+                download_queue.mark_error(self._current_item, str(e))
+                self._current_item = None
             self.root.after(0, lambda: self._set_dot(RED))
             self.root.after(0, lambda: self.status_var.set("Error during download"))
             self.root.after(0, lambda err=e: self.log(f"ERROR: {err}", "err"))
         finally:
+            self._is_downloading = False
             self.root.after(0, lambda: self.dl_btn.config_state(True, "  ⬇  START DOWNLOAD  "))
             self.root.after(0, lambda: self.fetch_btn.config_state(True, "  🔍 FETCH  "))
+            self.root.after(0, self._update_queue_display)
+            self.root.after(200, self._start_next_download)
 
     def _update_progress(self, pct_str, speed, eta, pct_float, size):
         self.speed_var.set(speed[:12])
@@ -863,7 +1216,7 @@ By Ahmed Amer"""
 
 def main():
     root = tk.Tk()
-    app  = YouTubeDownloader(root)
+    app  = YTGrabApp(root)
     root.mainloop()
 
 
