@@ -29,42 +29,56 @@
             const player = document.querySelector('#movie_player') || document.querySelector('.html5-video-player');
             if (player) {
                 const video = player.querySelector('video.html5-main-video') || player.querySelector('video');
-                if (video && video.src && video.readyState >= 2) return video;
+                if (video) return video;
             }
             const video = document.querySelector('video.html5-main-video');
-            if (video && video.src && video.readyState >= 2) return video;
+            if (video) return video;
         }
 
         if (platform === 'tiktok') {
             const video = document.querySelector('[data-e2e="video-player"] video') ||
                          document.querySelector('.tiktok-1no72h2-DivVideoPlayerContainerV2 video') ||
                          document.querySelector('video[xvideo]');
-            if (video && video.src && video.readyState >= 2) return video;
+            if (video) return video;
         }
 
         if (platform === 'instagram') {
             const video = document.querySelector('video[playsinline]') ||
                          document.querySelector('article video');
-            if (video && video.src && video.readyState >= 2) return video;
+            if (video) return video;
         }
 
         if (platform === 'twitter' || platform === 'x') {
             const video = document.querySelector('video[playsinline]') ||
                          document.querySelector('[data-testid="videoPlayer"] video');
-            if (video && video.src && video.readyState >= 2) return video;
+            if (video) return video;
         }
 
         if (platform === 'facebook') {
-            const video = document.querySelector('video[data-testid="fbvideo"]') ||
-                         document.querySelector('div[role="presentation"] video');
-            if (video && video.src && video.readyState >= 2) return video;
+            const selectors = [
+                'video[data-testid="fbvideo"]',
+                'div[role="presentation"] video',
+                'video[style*="width"]',
+                'div[data-pagelet] video',
+                'div[aria-label*="video" i] video',
+                'video'
+            ];
+            for (const sel of selectors) {
+                const videos = document.querySelectorAll(sel);
+                for (const video of videos) {
+                    const rect = video.getBoundingClientRect();
+                    if (rect.width > 100 && rect.height > 100) {
+                        return video;
+                    }
+                }
+            }
         }
 
         const allVideos = document.querySelectorAll('video');
         for (const video of allVideos) {
             const rect = video.getBoundingClientRect();
             const isVisible = rect.width > 200 && rect.height > 150;
-            if (isVisible && video.src && video.readyState >= 2) {
+            if (isVisible) {
                 return video;
             }
         }
