@@ -11,13 +11,21 @@ A YouTube video and playlist downloader with a modern IDM-inspired dark UI.
 - Auto-merges video + audio streams
 - Dark theme with amber accent (IDM-style)
 
+## Prerequisites
+
+FFmpeg is required. Install it via:
+
+```bash
+winget install Gyan.FFmpeg
+```
+
 ## Installation
 
 ### Download
 
-Download the latest release from [GitHub Releases](https://github.com/ahmedamer00/ytgrab/releases).
+Download the latest release from [GitHub Releases](https://github.com/a7mdmo74/ytgrap/releases).
 
-Extract the zip and run `YTGrab.exe`.
+Extract the zip and run `install.bat` as administrator.
 
 ### Build from source
 

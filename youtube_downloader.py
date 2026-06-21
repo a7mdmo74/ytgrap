@@ -9,14 +9,32 @@ import time
 # ── Frozen (exe) support ─────────────────────────────────────────────────────
 if getattr(sys, 'frozen', False):
     APP_DIR = os.path.dirname(sys.executable)
-    # PyInstaller puts --add-binary files in _internal/
     _internal = os.path.join(APP_DIR, "_internal")
-    FFMPEG_DIR = os.path.join(_internal, "ffmpeg_bin") if os.path.isdir(os.path.join(_internal, "ffmpeg_bin")) else os.path.join(APP_DIR, "ffmpeg_bin")
     ICO_PATH = os.path.join(_internal, "ytgrab_icon.ico") if os.path.exists(os.path.join(_internal, "ytgrab_icon.ico")) else os.path.join(APP_DIR, "ytgrab_icon.ico")
 else:
     APP_DIR = os.path.dirname(os.path.abspath(__file__))
-    FFMPEG_DIR = r"C:\Users\dev\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\ffmpeg-8.1.1-full_build\bin"
     ICO_PATH = os.path.join(APP_DIR, "ytgrab_icon.ico")
+
+# ── FFmpeg detection ────────────────────────────────────────────────────────
+def _find_ffmpeg():
+    candidates = []
+    if getattr(sys, 'frozen', False):
+        _internal = os.path.join(APP_DIR, "_internal")
+        candidates.append(os.path.join(_internal, "ffmpeg_bin"))
+        candidates.append(os.path.join(APP_DIR, "ffmpeg_bin"))
+    winget_base = os.path.join(os.environ.get("LOCALAPPDATA", ""), "Microsoft", "WinGet", "Packages")
+    if os.path.isdir(winget_base):
+        for d in os.listdir(winget_base):
+            if "ffmpeg" in d.lower():
+                for sub in os.listdir(os.path.join(winget_base, d)):
+                    candidates.append(os.path.join(winget_base, d, sub, "bin"))
+    candidates.append(r"C:\ffmpeg\bin")
+    for p in candidates:
+        if os.path.isdir(p) and os.path.isfile(os.path.join(p, "ffmpeg.exe")):
+            return p
+    return ""
+
+FFMPEG_DIR = _find_ffmpeg()
 
 # ── Palette (IDM-inspired: dark steel, amber accent, clean chrome) ──────────
 BG          = "#1c1f26"       # deep charcoal body
