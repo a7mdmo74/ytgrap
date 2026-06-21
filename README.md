@@ -4,6 +4,8 @@ A YouTube video and playlist downloader with IDM-style browser integration.
 
 Works on **Windows**, **macOS**, and **Linux**.
 
+[العربية](README-ar.md)
+
 ## Features
 
 - Download YouTube videos in multiple qualities (up to 4K)

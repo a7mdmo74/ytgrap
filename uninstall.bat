@@ -17,6 +17,10 @@ set "INSTALLDIR=%ProgramFiles%\YTGrab"
 echo Uninstalling YTGrab from: %INSTALLDIR%
 echo.
 
+:: Remove scheduled task (startup)
+echo Removing startup task...
+powershell -Command "Unregister-ScheduledTask -TaskName 'YTGrab' -Confirm:$false" 2>nul
+
 :: Remove desktop shortcut
 if exist "%USERPROFILE%\Desktop\YTGrab.lnk" del "%USERPROFILE%\Desktop\YTGrab.lnk"
 

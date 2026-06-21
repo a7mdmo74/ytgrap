@@ -29,6 +29,13 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
+:: Copy browser extension
+echo Copying browser extension...
+xcopy /E /I /Y "%~dp0browser_extension" "%INSTALLDIR%\browser_extension"
+if %errorlevel% neq 0 (
+    echo WARNING: Could not copy browser extension.
+)
+
 :: Verify the exe exists
 if not exist "%INSTALLDIR%\YTGrab.exe" (
     echo ERROR: YTGrab.exe not found after copy!
@@ -36,32 +43,31 @@ if not exist "%INSTALLDIR%\YTGrab.exe" (
     exit /b 1
 )
 
-:: Create desktop shortcut using PowerShell
+:: Create desktop shortcut
 echo Creating desktop shortcut...
 powershell -Command "$WshShell = New-Object -ComObject WScript.Shell; $desk = [Environment]::GetFolderPath('Desktop'); $s = $WshShell.CreateShortcut([System.IO.Path]::Combine($desk, 'YTGrab.lnk')); $s.TargetPath = '%INSTALLDIR%\YTGrab.exe'; $s.IconLocation = '%INSTALLDIR%\YTGrab.exe,0'; $s.Save()"
-if %errorlevel% neq 0 (
-    echo WARNING: Could not create desktop shortcut.
-) else (
-    echo   Desktop shortcut created.
-)
 
 :: Create Start Menu shortcut
 echo Creating Start Menu shortcut...
 powershell -Command "$WshShell = New-Object -ComObject WScript.Shell; $s = $WshShell.CreateShortcut([System.IO.Path]::Combine($env:ProgramData, 'Microsoft', 'Windows', 'Start Menu', 'Programs', 'YTGrab.lnk')); $s.TargetPath = '%INSTALLDIR%\YTGrab.exe'; $s.IconLocation = '%INSTALLDIR%\YTGrab.exe,0'; $s.Save()"
-if %errorlevel% neq 0 (
-    echo WARNING: Could not create Start Menu shortcut.
-) else (
-    echo   Start Menu shortcut created.
-)
+
+:: Add to Windows startup (runs minimized to tray)
+echo Adding to Windows startup...
+powershell -Command "New-ScheduledTask -TaskName 'YTGrab' -Description 'YTGrab Download Manager' -Trigger (New-ScheduledTaskTrigger -AtLogOn) -Action (New-ScheduledTaskAction -Execute '%INSTALLDIR%\YTGrab.exe' -Argument '--minimized') -Settings (New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -RunOnlyIfNetworkAvailable) -Force"
 
 echo.
 echo ================================
 echo    Installation Complete!
 echo ================================
 echo.
-echo You can now launch YTGrab from:
+echo YTGrab will now:
+echo   - Start automatically when you log in
+echo   - Run in system tray (background)
+echo   - Detect videos from browser extension
+echo.
+echo You can launch YTGrab from:
 echo   - Desktop shortcut
 echo   - Start Menu
-echo   - Or run: %INSTALLDIR%\YTGrab.exe
+echo   - System tray icon
 echo.
 pause

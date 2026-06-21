@@ -10,6 +10,13 @@ import uuid
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from collections import deque
 
+try:
+    import pystray
+    from PIL import Image, ImageDraw
+    HAS_TRAY = True
+except ImportError:
+    HAS_TRAY = False
+
 # ── Frozen (exe) support ─────────────────────────────────────────────────────
 if getattr(sys, 'frozen', False):
     APP_DIR = os.path.dirname(sys.executable)
@@ -1214,9 +1221,75 @@ By Ahmed Amer"""
             pass
 
 
+def create_tray_icon():
+    if not HAS_TRAY:
+        return None
+    img = Image.new('RGBA', (64, 64), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    draw.ellipse([4, 4, 60, 60], fill=(245, 166, 35))
+    draw.text((12, 10), "YT", fill=(28, 31, 38))
+    return img
+
+
 def main():
+    start_minimized = "--minimized" in sys.argv
     root = tk.Tk()
     app  = YTGrabApp(root)
+
+    if start_minimized:
+        root.withdraw()
+        app.log("Started minimized to system tray", "info")
+
+        if HAS_TRAY:
+            icon_image = create_tray_icon()
+
+            def show_window(icon, item):
+                root.after(0, root.deiconify)
+
+            def quit_app(icon, item):
+                icon.stop()
+                root.after(0, root.destroy)
+
+            menu = pystray.Menu(
+                pystray.MenuItem("Show YTGrab", show_window, default=True),
+                pystray.MenuItem("Quit", quit_app)
+            )
+
+            tray_icon = pystray.Icon("YTGrab", icon_image, "YTGrab Download Manager", menu)
+            tray_thread = threading.Thread(target=tray_icon.run, daemon=True)
+            tray_thread.start()
+
+            def on_close():
+                root.withdraw()
+
+            root.protocol("WM_DELETE_WINDOW", on_close)
+        else:
+            root.deiconify()
+    else:
+        if HAS_TRAY:
+            icon_image = create_tray_icon()
+
+            def show_window(icon, item):
+                root.after(0, root.deiconify)
+
+            def quit_app(icon, item):
+                icon.stop()
+                root.after(0, root.destroy)
+
+            menu = pystray.Menu(
+                pystray.MenuItem("Show YTGrab", show_window, default=True),
+                pystray.MenuItem("Quit", quit_app)
+            )
+
+            tray_icon = pystray.Icon("YTGrab", icon_image, "YTGrab Download Manager", menu)
+            tray_thread = threading.Thread(target=tray_icon.run, daemon=True)
+            tray_thread.start()
+
+            def on_close():
+                root.withdraw()
+
+            root.protocol("WM_DELETE_WINDOW", on_close)
+
     root.mainloop()
 
 
