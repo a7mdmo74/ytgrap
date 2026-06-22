@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YTGrab - YouTube Video Downloader</title>
-    <meta name="description" content="YouTube video and playlist downloader with IDM-style browser extension. Download videos up to 4K from 12+ platforms.">
+    <title>YTGrab - تحميل فيديوهات يوتيوب</title>
+    <meta name="description" content="تحميل فيديوهات وقوائم تشغيل يوتيوب مع إضافة متصفح بأسلوب IDM. حمّل فيديوهات بدقة تصل إلى 4K من أكثر من 12 منصة.">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⬇</text></svg>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after {
             margin: 0;
@@ -31,10 +32,10 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: 'Noto Kufi Arabic', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background-color: var(--bg-primary);
             color: var(--text-primary);
-            line-height: 1.6;
+            line-height: 1.8;
         }
 
         a {
@@ -90,6 +91,7 @@
             display: flex;
             gap: 32px;
             list-style: none;
+            align-items: center;
         }
 
         .nav-links a {
@@ -107,12 +109,12 @@
             padding: 6px 12px;
             border-radius: 6px;
             border: 1px solid var(--border);
-            font-size: 0.85rem !important;
+            font-size: 0.85rem;
         }
 
         .lang-switch:hover {
             border-color: var(--accent);
-            color: var(--accent) !important;
+            color: var(--accent);
         }
 
         .hamburger {
@@ -152,10 +154,10 @@
         }
 
         .hero h1 {
-            font-size: 3.5rem;
+            font-size: 3.25rem;
             font-weight: 800;
             margin-bottom: 16px;
-            letter-spacing: -1px;
+            letter-spacing: -0.5px;
         }
 
         .hero h1 span {
@@ -163,9 +165,9 @@
         }
 
         .hero .tagline {
-            font-size: 1.25rem;
+            font-size: 1.15rem;
             color: var(--text-secondary);
-            max-width: 600px;
+            max-width: 650px;
             margin: 0 auto 40px;
         }
 
@@ -349,6 +351,7 @@
             border-radius: 4px;
             font-size: 0.9rem;
             color: var(--accent);
+            font-family: 'Consolas', 'SF Mono', monospace;
         }
 
         .code-block {
@@ -357,9 +360,11 @@
             border-radius: 8px;
             padding: 16px;
             margin-top: 12px;
-            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-family: 'Consolas', 'SF Mono', monospace;
             font-size: 0.9rem;
             overflow-x: auto;
+            direction: ltr;
+            text-align: left;
         }
 
         .code-block .comment {
@@ -449,7 +454,7 @@
             }
 
             .hero h1 {
-                font-size: 2.25rem;
+                font-size: 2rem;
             }
 
             .hero .tagline {
@@ -491,11 +496,11 @@
                 YTGrab
             </a>
             <ul class="nav-links" id="navLinks">
-                <li><a href="#features">Features</a></li>
-                <li><a href="#how-to-use">How to Use</a></li>
-                <li><a href="#platforms">Platforms</a></li>
-                <li><a href="#download">Download</a></li>
-                <li><a href="index-ar.html" class="lang-switch"><i class="fas fa-globe"></i> عربي</a></li>
+                <li><a href="#features">المميزات</a></li>
+                <li><a href="#how-to-use">كيفية الاستخدام</a></li>
+                <li><a href="#platforms">المنصات</a></li>
+                <li><a href="#download">تحميل</a></li>
+                <li><a href="index.html" class="lang-switch"><i class="fas fa-globe"></i> English</a></li>
             </ul>
             <button class="hamburger" id="hamburger" aria-label="Toggle menu">
                 <span></span>
@@ -507,8 +512,8 @@
 
     <section class="hero" id="download">
         <div class="container">
-            <h1>Download <span>YouTube</span> Videos Effortlessly</h1>
-            <p class="tagline">YouTube video and playlist downloader with IDM-style browser integration. Download videos up to 4K from 12+ platforms.</p>
+            <h1>حمّل فيديوهات <span>يوتيوب</span> بسهولة</h1>
+            <p class="tagline">تطبيق تحميل فيديوهات وقوائم تشغيل يوتيوب مع إضافة متصفح بأسلوب IDM. حمّل فيديوهات بدقة تصل إلى 4K من أكثر من 12 منصة.</p>
             <div class="hero-buttons">
                 <a href="https://github.com/a7mdmo74/ytgrap/releases/latest/download/YTGrab.zip" class="btn btn-primary" id="downloadBtn">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -516,24 +521,24 @@
                         <polyline points="7 10 12 15 17 10"/>
                         <line x1="12" y1="15" x2="12" y2="3"/>
                     </svg>
-                    Download for Windows
+                    تحميل للويندوز
                 </a>
                 <a href="https://github.com/a7mdmo74/ytgrap/releases" class="btn btn-secondary">
-                    View All Releases
+                    جميع الإصدارات
                 </a>
             </div>
             <div class="hero-stats">
                 <div class="stat">
                     <div class="stat-value">4K</div>
-                    <div class="stat-label">Max Quality</div>
+                    <div class="stat-label">أعلى جودة</div>
                 </div>
                 <div class="stat">
                     <div class="stat-value">12+</div>
-                    <div class="stat-label">Platforms</div>
+                    <div class="stat-label">منصة</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-value">Free</div>
-                    <div class="stat-label">Open Source</div>
+                    <div class="stat-value">مجاني</div>
+                    <div class="stat-label">مفتوح المصدر</div>
                 </div>
             </div>
         </div>
@@ -541,38 +546,38 @@
 
     <section id="features">
         <div class="container">
-            <h2 class="section-title">Powerful Features</h2>
-            <p class="section-subtitle">Everything you need to download and manage videos from the web.</p>
+            <h2 class="section-title">مميزات قوية</h2>
+            <p class="section-subtitle">كل ما تحتاجه لتحميل وإدارة الفيديوهات من الإنترنت.</p>
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon"><i class="fas fa-film"></i></div>
-                    <h3>Up to 4K Quality</h3>
-                    <p>Download videos in multiple qualities, including 4K Ultra HD, with automatic stream merging.</p>
+                    <h3>جودة تصل إلى 4K</h3>
+                    <p>حمّل الفيديوهات بجودات متعددة تشمل Ultra HD 4K مع دمج تلقائي للstreams.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon"><i class="fas fa-list"></i></div>
-                    <h3>Playlist Support</h3>
-                    <p>Paste a playlist URL and download all videos at once with automatic detection.</p>
+                    <h3>دعم قوائم التشغيل</h3>
+                    <p>الصق رابط قائمة التشغيل وحمّل جميع الفيديوهات دفعة واحدة مع كشف تلقائي.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon"><i class="fas fa-bolt"></i></div>
-                    <h3>Live Progress</h3>
-                    <p>Real-time display of download speed, ETA, file size, and progress percentage.</p>
+                    <h3>تقدم مباشر</h3>
+                    <p>عرض فوري لسرعة التحميل والوقت المتبقي وحجم الملف ونسبة التقدم.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon"><i class="fas fa-wrench"></i></div>
-                    <h3>Multiple Formats</h3>
-                    <p>Export to MP4, MKV, or WebM. Adjust parallel fragments and retry settings.</p>
+                    <h3>صيغ متعددة</h3>
+                    <p>تصدير إلى MP4 أو MKV أو WebM. اضبط إعدادات الأجزاء المتوازية المحاولات.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon"><i class="fas fa-puzzle-piece"></i></div>
-                    <h3>Browser Extension</h3>
-                    <p>IDM-style extension for Chrome, Edge, and Firefox. Detect and download videos with one click.</p>
+                    <h3>إضافة المتصفح</h3>
+                    <p>إضافة بأسلوب IDM لـ Chrome و Edge و Firefox. كشف وتحميل الفيديوهات بنقرة واحدة.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon"><i class="fas fa-moon"></i></div>
-                    <h3>Dark Theme</h3>
-                    <p>Beautiful dark UI with amber accent. Comfortable to use day and night.</p>
+                    <h3>وضع مظلم</h3>
+                    <p>واجهة جميلة بلون مظلم مع لمسة كهرمانية. مريحة للاستخدام نهاراً وليلاً.</p>
                 </div>
             </div>
         </div>
@@ -580,8 +585,8 @@
 
     <section id="how-to-use" style="background: var(--bg-secondary);">
         <div class="container">
-            <h2 class="section-title">How to Use</h2>
-            <p class="section-subtitle">Get started in minutes with multiple installation options.</p>
+            <h2 class="section-title">كيفية الاستخدام</h2>
+            <p class="section-subtitle">ابدأ في دقائق مع خيارات تثبيت متعددة.</p>
             <div class="steps">
                 <div class="step-group">
                     <h3>
@@ -589,15 +594,15 @@
                             <polyline points="4 17 10 11 4 5"/>
                             <line x1="12" y1="19" x2="20" y2="19"/>
                         </svg>
-                        Quick Install (pip)
+                        تثبيت سريع (pip)
                     </h3>
                     <ul class="step-list">
                         <li>
                             <span class="step-number">1</span>
                             <div class="step-text">
-                                Install Python 3.10+ and FFmpeg
+                                ثبّت Python 3.10+ و FFmpeg
                                 <div class="code-block">
-                                    <span class="comment"># Windows</span><br>
+                                    <span class="comment"># ويندوز</span><br>
                                     <span class="cmd">winget install Gyan.FFmpeg</span><br><br>
                                     <span class="comment"># macOS</span><br>
                                     <span class="cmd">brew install ffmpeg</span><br><br>
@@ -608,15 +613,15 @@
                         </li>
                         <li>
                             <span class="step-number">2</span>
-                            <div class="step-text">Install and run YTGrab</div>
+                            <div class="step-text">ثبّت YTGrab وأشغله</div>
                         </li>
                         <li>
                             <span class="step-number">3</span>
-                            <div class="step-text">Paste a YouTube URL and click <strong>Fetch</strong></div>
+                            <div class="step-text">الصق رابط يوتيوب واضغط <strong>Fetch</strong></div>
                         </li>
                         <li>
                             <span class="step-number">4</span>
-                            <div class="step-text">Select quality and click <strong>Start Download</strong></div>
+                            <div class="step-text">اختر الجودة واضغط <strong>Start Download</strong></div>
                         </li>
                     </ul>
                     <div class="code-block">
@@ -631,28 +636,28 @@
                             <line x1="8" y1="21" x2="16" y2="21"/>
                             <line x1="12" y1="17" x2="12" y2="21"/>
                         </svg>
-                        Browser Extension
+                        إضافة المتصفح
                     </h3>
                     <ul class="step-list">
                         <li>
                             <span class="step-number">1</span>
-                            <div class="step-text">Open your browser and go to <code>chrome://extensions</code></div>
+                            <div class="step-text">افتح متصفحك واذهب إلى <code>chrome://extensions</code></div>
                         </li>
                         <li>
                             <span class="step-number">2</span>
-                            <div class="step-text">Enable <strong>Developer mode</strong> (toggle in top right)</div>
+                            <div class="step-text">فعّل <strong>وضع المطور</strong> (الزر في الأعلى يمين)</div>
                         </li>
                         <li>
                             <span class="step-number">3</span>
-                            <div class="step-text">Click <strong>Load unpacked</strong> and select the <code>browser_extension</code> folder</div>
+                            <div class="step-text">اضغط <strong>Load unpacked</strong واختر مجلد <code>browser_extension</code></div>
                         </li>
                         <li>
                             <span class="step-number">4</span>
-                            <div class="step-text">Start the YTGrab app (server starts on port 19850)</div>
+                            <div class="step-text">شغّل تطبيق YTGrab (يبدأ السيرفر على البورت 19850)</div>
                         </li>
                         <li>
                             <span class="step-number">5</span>
-                            <div class="step-text">Browse any supported platform and click the download button</div>
+                            <div class="step-text">تصفح أي منصة مدعومة واضغط زر التحميل</div>
                         </li>
                     </ul>
                 </div>
@@ -662,56 +667,56 @@
 
     <section id="platforms">
         <div class="container">
-            <h2 class="section-title">Supported Platforms</h2>
-            <p class="section-subtitle">Download videos from 12+ popular platforms with the browser extension.</p>
+            <h2 class="section-title">المنصات المدعومة</h2>
+            <p class="section-subtitle">حمّل الفيديوهات من أكثر من 12 منصة شهيرة مع إضافة المتصفح.</p>
             <div class="platforms-grid">
                 <div class="platform-badge">
                     <div class="platform-icon"><i class="fab fa-youtube"></i></div>
-                    <div class="platform-name">YouTube</div>
+                    <div class="platform-name">يوتيوب</div>
                 </div>
                 <div class="platform-badge">
                     <div class="platform-icon"><i class="fab fa-youtube"></i></div>
-                    <div class="platform-name">YouTube Music</div>
+                    <div class="platform-name">يوتيوب ميوزك</div>
                 </div>
                 <div class="platform-badge">
                     <div class="platform-icon"><i class="fab fa-instagram"></i></div>
-                    <div class="platform-name">Instagram</div>
+                    <div class="platform-name">انستغرام</div>
                 </div>
                 <div class="platform-badge">
                     <div class="platform-icon"><i class="fab fa-facebook"></i></div>
-                    <div class="platform-name">Facebook</div>
+                    <div class="platform-name">فيسبوك</div>
                 </div>
                 <div class="platform-badge">
                     <div class="platform-icon"><i class="fab fa-x-twitter"></i></div>
-                    <div class="platform-name">Twitter / X</div>
+                    <div class="platform-name">تويتر / X</div>
                 </div>
                 <div class="platform-badge">
                     <div class="platform-icon"><i class="fab fa-tiktok"></i></div>
-                    <div class="platform-name">TikTok</div>
+                    <div class="platform-name">تيك توك</div>
                 </div>
                 <div class="platform-badge">
                     <div class="platform-icon"><i class="fab fa-vimeo-v"></i></div>
-                    <div class="platform-name">Vimeo</div>
+                    <div class="platform-name">فيوميو</div>
                 </div>
                 <div class="platform-badge">
                     <div class="platform-icon"><i class="fas fa-tv"></i></div>
-                    <div class="platform-name">Dailymotion</div>
+                    <div class="platform-name">ديلي موشن</div>
                 </div>
                 <div class="platform-badge">
                     <div class="platform-icon"><i class="fab fa-twitch"></i></div>
-                    <div class="platform-name">Twitch</div>
+                    <div class="platform-name">تويتش</div>
                 </div>
                 <div class="platform-badge">
                     <div class="platform-icon"><i class="fab fa-reddit"></i></div>
-                    <div class="platform-name">Reddit</div>
+                    <div class="platform-name">ريديت</div>
                 </div>
                 <div class="platform-badge">
                     <div class="platform-icon"><i class="fas fa-tower-broadcast"></i></div>
-                    <div class="platform-name">Bilibili</div>
+                    <div class="platform-name">بيلي بيلي</div>
                 </div>
                 <div class="platform-badge">
                     <div class="platform-icon"><i class="fab fa-soundcloud"></i></div>
-                    <div class="platform-name">SoundCloud</div>
+                    <div class="platform-name">ساوند كلاود</div>
                 </div>
             </div>
         </div>
@@ -719,8 +724,8 @@
 
     <section id="cta" style="background: var(--bg-secondary);">
         <div class="container" style="text-align: center;">
-            <h2 class="section-title">Ready to Start?</h2>
-            <p class="section-subtitle">Download YTGrab now and start saving your favorite videos.</p>
+            <h2 class="section-title">جاهز للبدء؟</h2>
+            <p class="section-subtitle">حمّل YTGrab الآن وابدأ في حفظ فيديوهاتك المفضلة.</p>
             <div class="hero-buttons">
                 <a href="https://github.com/a7mdmo74/ytgrap/releases/latest/download/YTGrab.zip" class="btn btn-primary">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -728,10 +733,10 @@
                         <polyline points="7 10 12 15 17 10"/>
                         <line x1="12" y1="15" x2="12" y2="3"/>
                     </svg>
-                    Download for Windows
+                    تحميل للويندوز
                 </a>
                 <a href="https://github.com/a7mdmo74/ytgrap" class="btn btn-secondary">
-                    View on GitHub
+                    عرض على GitHub
                 </a>
             </div>
         </div>
@@ -739,11 +744,11 @@
 
     <footer>
         <div class="container">
-            <p>Made with Python | Licensed under MIT</p>
+            <p>صُنع بـ Python | مرخص بموجب MIT</p>
             <div class="footer-links">
                 <a href="https://github.com/a7mdmo74/ytgrap">GitHub</a>
-                <a href="https://github.com/a7mdmo74/ytgrap/releases">Releases</a>
-                <a href="https://github.com/a7mdmo74/ytgrap/blob/main/LICENSE">License</a>
+                <a href="https://github.com/a7mdmo74/ytgrap/releases">الإصدارات</a>
+                <a href="https://github.com/a7mdmo74/ytgrap/blob/main/LICENSE">الرخصة</a>
             </div>
         </div>
     </footer>
