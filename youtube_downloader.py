@@ -318,6 +318,10 @@ class YTGrabApp:
         self._dl_start_time  = None
         self._speed_samples  = []
         self._is_downloading = False
+        self._is_paused      = False
+        self._cancel_event   = threading.Event()
+        self._pause_event    = threading.Event()
+        self._pause_event.set()
         self._current_item   = None
 
         download_queue.set_callback(lambda: self.root.after(0, self._update_queue_display))
@@ -525,6 +529,10 @@ class YTGrabApp:
                                 command=self.start_download, width=200, height=40,
                                 text_color=BG)
         self.dl_btn.pack(side="left")
+
+        self.pause_btn = IDMButton(dl_row, "  ⏸ Pause  ", BLUE, BLUE_LT,
+                                   command=self._toggle_pause, width=90, height=40)
+        self.pause_btn.pack(side="left", padx=(10,0))
 
         self.cancel_btn = IDMButton(dl_row, " ✖ Cancel ", RED, RED_DK,
                                     command=self._cancel, width=90, height=40)
@@ -977,14 +985,26 @@ By Ahmed Amer"""
                   cursor="hand2", command=win.destroy).pack(side="left", padx=6)
 
     def _cancel(self):
-        self.status_var.set("Cancelled")
-        self._set_dot(RED)
-        self.log("Download cancelled by user.", "err")
-        self.dl_btn.config_state(True, "  ⬇  START DOWNLOAD  ")
-        self.fetch_btn.config_state(True, "  🔍 FETCH  ")
-        self.progress["value"] = 0
-        self._reset_chips()
-        self._is_downloading = False
+        self._cancel_event.set()
+        self._pause_event.set()
+        self.status_var.set("Cancelling...")
+        self.log("Cancelling download...", "err")
+        self.dl_btn.config_state(False, "  ⏳ Cancelling…  ")
+        self.fetch_btn.config_state(False)
+
+    def _toggle_pause(self):
+        if self._is_paused:
+            self._is_paused = False
+            self._pause_event.set()
+            self.pause_btn.config_state(True, "  ⏸ Pause  ")
+            self.status_var.set("Resumed")
+            self.log("Download resumed.", "ok")
+        else:
+            self._is_paused = True
+            self._pause_event.clear()
+            self.pause_btn.config_state(True, "  ▶ Resume  ")
+            self.status_var.set("Paused")
+            self.log("Download paused.", "info")
 
     def _reset_chips(self):
         self.speed_var.set("—")
@@ -1109,8 +1129,12 @@ By Ahmed Amer"""
             messagebox.showwarning("No quality", "Select a quality option.")
             return
 
+        self._cancel_event.clear()
+        self._pause_event.set()
+        self._is_paused = False
         self.dl_btn.config_state(False, "  ⏳ Downloading…  ")
         self.fetch_btn.config_state(False, "  🔍 FETCH  ")
+        self.pause_btn.config_state(True, "  ⏸ Pause  ")
         self._set_dot("#facc15")
         self.status_var.set("Preparing download…")
         self.progress["value"] = 0
@@ -1138,6 +1162,10 @@ By Ahmed Amer"""
             download_count = [0]
 
             def progress_hook(d):
+                if self._cancel_event.is_set():
+                    raise Exception("Download cancelled by user")
+                self._pause_event.wait()
+
                 if d["status"] == "downloading":
                     pct_raw = d.get("_percent_str", "0%").strip()
                     speed   = d.get("_speed_str", "—").strip()
@@ -1208,15 +1236,26 @@ By Ahmed Amer"""
 
         except Exception as e:
             if self._current_item:
-                download_queue.mark_error(self._current_item, str(e))
+                if self._cancel_event.is_set():
+                    download_queue.mark_error(self._current_item, "Cancelled")
+                else:
+                    download_queue.mark_error(self._current_item, str(e))
                 self._current_item = None
-            self.root.after(0, lambda: self._set_dot(RED))
-            self.root.after(0, lambda: self.status_var.set("Error during download"))
-            self.root.after(0, lambda err=e: self.log(f"ERROR: {err}", "err"))
+            if not self._cancel_event.is_set():
+                self.root.after(0, lambda: self._set_dot(RED))
+                self.root.after(0, lambda: self.status_var.set("Error during download"))
+                self.root.after(0, lambda err=e: self.log(f"ERROR: {err}", "err"))
+            else:
+                self.root.after(0, lambda: self._set_dot(RED))
+                self.root.after(0, lambda: self.status_var.set("Download cancelled"))
         finally:
             self._is_downloading = False
+            self._is_paused = False
+            self._cancel_event.clear()
+            self._pause_event.set()
             self.root.after(0, lambda: self.dl_btn.config_state(True, "  ⬇  START DOWNLOAD  "))
             self.root.after(0, lambda: self.fetch_btn.config_state(True, "  🔍 FETCH  "))
+            self.root.after(0, lambda: self.pause_btn.config_state(True, "  ⏸ Pause  "))
             self.root.after(0, self._update_queue_display)
             self.root.after(200, self._start_next_download)
 
