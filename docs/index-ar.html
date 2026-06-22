@@ -3,744 +3,277 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YTGrab - تحميل فيديوهات يوتيوب</title>
-    <meta name="description" content="تحميل فيديوهات وقوائم تشغيل يوتيوب مع إضافة متصفح بأسلوب IDM. حمّل فيديوهات بدقة تصل إلى 4K من أكثر من 12 منصة.">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⬇</text></svg>">
+    <title>YTGrab - تحميل فيديوهات يوتيوب مجاناً | 4K، قوائم تشغيل، 12+ منصة</title>
+    <meta name="description" content="تحميل فيديوهات وقوائم تشغيل يوتيوب مجاناً مع إضافة متصفح بأسلوب IDM. حمّل فيديوهات بدقة تصل إلى 4K من يوتيوب وإنستغرام وتيك توك وفيسبوك وتويتر وأكثر من 12 منصة. يدعم الإيقاف المؤقت والإلغاء وقائمة الانتظار.">
+    <meta name="keywords" content="تحميل يوتيوب, تنزيل فيديو, تحميل فيديو يوتيوب, يوتيوب الى mp4, تحميل قوائم تشغيل, فيديو 4k, تحميل مجاني, اضافة متصفح, ytgrab">
+    <meta name="author" content="Ahmed Amer">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://a7mdmo74.github.io/ytgrap/index-ar.html">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://a7mdmo74.github.io/ytgrap/index-ar.html">
+    <meta property="og:title" content="YTGrab - تحميل فيديوهات يوتيوب مجاناً">
+    <meta property="og:description" content="تحميل فيديوهات يوتيوب مجاناً مع إضافة متصفح بأسلوب IDM. حمّل فيديوهات بدقة 4K من 12+ منصة.">
+    <meta property="og:locale" content="ar_SA">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="YTGrab - تحميل فيديوهات يوتيوب مجاناً">
+    <meta name="twitter:description" content="تحميل فيديوهات يوتيوب مجاناً مع إضافة متصفح بأسلوب IDM.">
+
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⬇</text></svg>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "YTGrab",
+        "applicationCategory": "MultimediaApplication",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "description": "تحميل فيديوهات يوتيوب مجاناً مع إضافة متصفح بأسلوب IDM",
+        "softwareVersion": "2.0.0",
+        "downloadUrl": "https://github.com/a7mdmo74/ytgrap/releases/latest",
+        "author": { "@type": "Person", "name": "Ahmed Amer" }
+    }
+    </script>
+
     <style>
-        *, *::before, *::after {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --bg-primary: #0f0f1a;
-            --bg-secondary: #1a1a2e;
-            --bg-card: #16213e;
-            --accent: #e2b714;
-            --accent-hover: #f5c842;
-            --text-primary: #ffffff;
-            --text-secondary: #a0a0b0;
-            --code-bg: #0d1117;
-            --border: #2a2a4a;
+            --bg: #0a0a14; --bg2: #10101e; --card: #1a1a32;
+            --accent: #e2b714; --accent2: #f5c842;
+            --text: #f0f0f5; --dim: #8888a0; --muted: #555568;
+            --border: #252540; --code: #0c0c18;
         }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Noto Kufi Arabic', -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.8; overflow-x: hidden; }
+        a { color: var(--accent); text-decoration: none; transition: 0.2s; }
+        a:hover { color: var(--accent2); }
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
 
-        html {
-            scroll-behavior: smooth;
-        }
+        nav { position: fixed; top: 0; left: 0; right: 0; background: rgba(10,10,20,0.92); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); z-index: 100; }
+        nav .container { display: flex; align-items: center; justify-content: space-between; height: 60px; }
+        .logo { font-size: 1.4rem; font-weight: 800; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+        .logo svg { width: 24px; height: 24px; }
+        .nav-links { display: flex; gap: 28px; list-style: none; align-items: center; }
+        .nav-links a { color: var(--dim); font-size: 0.9rem; font-weight: 500; }
+        .nav-links a:hover { color: var(--text); }
+        .lang-switch { background: var(--card); padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border); font-size: 0.8rem !important; }
+        .lang-switch:hover { border-color: var(--accent); color: var(--accent) !important; }
+        .hamburger { display: none; background: none; border: none; cursor: pointer; padding: 4px; }
+        .hamburger span { display: block; width: 22px; height: 2px; background: var(--text); margin: 5px 0; transition: 0.3s; }
 
-        body {
-            font-family: 'Noto Kufi Arabic', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.8;
-        }
+        .hero { padding: 130px 0 70px; text-align: center; position: relative; }
+        .hero::before { content: ''; position: absolute; top: -200px; left: 50%; transform: translateX(-50%); width: 800px; height: 800px; background: radial-gradient(circle, rgba(226,183,20,0.06) 0%, transparent 70%); pointer-events: none; }
+        .badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(226,183,20,0.1); border: 1px solid rgba(226,183,20,0.2); color: var(--accent); font-size: 0.8rem; font-weight: 600; padding: 6px 14px; border-radius: 999px; margin-bottom: 24px; }
+        .hero h1 { font-size: 3.2rem; font-weight: 800; margin-bottom: 20px; letter-spacing: -0.5px; line-height: 1.2; }
+        .hero h1 span { color: var(--accent); }
+        .hero .tagline { font-size: 1.1rem; color: var(--dim); max-width: 600px; margin: 0 auto 36px; }
+        .hero-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 26px; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; }
+        .btn-primary { background: var(--accent); color: #0a0a14; }
+        .btn-primary:hover { background: var(--accent2); color: #0a0a14; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(226,183,20,0.25); }
+        .btn-secondary { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+        .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+        .hero-stats { display: flex; justify-content: center; gap: 48px; margin-top: 56px; }
+        .stat-value { font-size: 1.8rem; font-weight: 800; color: var(--accent); }
+        .stat-label { font-size: 0.8rem; color: var(--dim); margin-top: 2px; }
 
-        a {
-            color: var(--accent);
-            text-decoration: none;
-            transition: color 0.2s;
-        }
+        section { padding: 72px 0; }
+        .section-title { font-size: 2rem; font-weight: 700; text-align: center; margin-bottom: 12px; }
+        .section-subtitle { text-align: center; color: var(--dim); max-width: 520px; margin: 0 auto 44px; font-size: 1rem; }
 
-        a:hover {
-            color: var(--accent-hover);
-        }
+        .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .feature-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 28px; transition: 0.3s; }
+        .feature-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.3); }
+        .feature-icon { width: 44px; height: 44px; background: rgba(226,183,20,0.08); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; margin-bottom: 14px; color: var(--accent); }
+        .feature-card h3 { font-size: 1.05rem; margin-bottom: 6px; }
+        .feature-card p { color: var(--dim); font-size: 0.9rem; }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
+        .steps { display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px; }
+        .step-group h3 { font-size: 1.2rem; margin-bottom: 20px; color: var(--accent); display: flex; align-items: center; gap: 10px; }
+        .step-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+        .step-list li { display: flex; gap: 14px; align-items: flex-start; }
+        .step-number { min-width: 28px; height: 28px; background: var(--accent); color: #0a0a14; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; flex-shrink: 0; }
+        .step-text { padding-top: 3px; font-size: 0.95rem; }
+        .step-text code { background: var(--code); padding: 2px 7px; border-radius: 4px; font-size: 0.85rem; color: var(--accent); font-family: 'Consolas', monospace; direction: ltr; }
+        .code-block { background: var(--code); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-top: 10px; font-family: 'Consolas', monospace; font-size: 0.85rem; overflow-x: auto; direction: ltr; text-align: left; }
+        .code-block .comment { color: #6a737d; }
+        .code-block .cmd { color: var(--accent); }
 
-        /* Navigation */
-        nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(15, 15, 26, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border);
-            z-index: 1000;
-        }
+        .platforms-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; }
+        .platform-badge { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px 16px; text-align: center; transition: 0.2s; }
+        .platform-badge:hover { border-color: var(--accent); }
+        .platform-icon { font-size: 2.2rem; margin-bottom: 10px; color: var(--text); transition: 0.2s; }
+        .platform-badge:hover .platform-icon { color: var(--accent); }
+        .platform-name { font-size: 0.85rem; color: var(--dim); }
 
-        nav .container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            height: 64px;
-        }
+        .cta { background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
 
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--accent);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        footer { border-top: 1px solid var(--border); padding: 36px 0; text-align: center; }
+        footer p { color: var(--muted); font-size: 0.8rem; }
+        footer .footer-links { display: flex; justify-content: center; gap: 20px; margin-top: 12px; }
+        footer .footer-links a { color: var(--dim); font-size: 0.85rem; }
+        footer .footer-links a:hover { color: var(--accent); }
 
-        .logo svg {
-            width: 28px;
-            height: 28px;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 32px;
-            list-style: none;
-            align-items: center;
-        }
-
-        .nav-links a {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            transition: color 0.2s;
-        }
-
-        .nav-links a:hover {
-            color: var(--text-primary);
-        }
-
-        .lang-switch {
-            background: var(--bg-card);
-            padding: 6px 12px;
-            border-radius: 6px;
-            border: 1px solid var(--border);
-            font-size: 0.85rem;
-        }
-
-        .lang-switch:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-
-        .hamburger {
-            display: none;
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 4px;
-        }
-
-        .hamburger span {
-            display: block;
-            width: 24px;
-            height: 2px;
-            background: var(--text-primary);
-            margin: 6px 0;
-            transition: 0.3s;
-        }
-
-        /* Hero */
-        .hero {
-            padding: 140px 0 80px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(ellipse at center, rgba(226, 183, 20, 0.08) 0%, transparent 60%);
-            pointer-events: none;
-        }
-
-        .hero h1 {
-            font-size: 3.25rem;
-            font-weight: 800;
-            margin-bottom: 16px;
-            letter-spacing: -0.5px;
-        }
-
-        .hero h1 span {
-            color: var(--accent);
-        }
-
-        .hero .tagline {
-            font-size: 1.15rem;
-            color: var(--text-secondary);
-            max-width: 650px;
-            margin: 0 auto 40px;
-        }
-
-        .hero-buttons {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 14px 28px;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            transition: all 0.2s;
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: #0f0f1a;
-        }
-
-        .btn-primary:hover {
-            background: var(--accent-hover);
-            color: #0f0f1a;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(226, 183, 20, 0.3);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-        }
-
-        .btn-secondary:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-
-        .hero-stats {
-            display: flex;
-            justify-content: center;
-            gap: 48px;
-            margin-top: 64px;
-        }
-
-        .stat {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--accent);
-        }
-
-        .stat-label {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-        }
-
-        /* Sections */
-        section {
-            padding: 80px 0;
-        }
-
-        .section-title {
-            font-size: 2.25rem;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 16px;
-        }
-
-        .section-subtitle {
-            text-align: center;
-            color: var(--text-secondary);
-            max-width: 600px;
-            margin: 0 auto 48px;
-        }
-
-        /* Features Grid */
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
-        }
-
-        .feature-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 32px;
-            transition: all 0.3s;
-        }
-
-        .feature-card:hover {
-            border-color: var(--accent);
-            transform: translateY(-4px);
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
-        }
-
-        .feature-icon {
-            width: 48px;
-            height: 48px;
-            background: rgba(226, 183, 20, 0.1);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-            margin-bottom: 16px;
-            color: var(--accent);
-        }
-
-        .feature-card h3 {
-            font-size: 1.125rem;
-            margin-bottom: 8px;
-        }
-
-        .feature-card p {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-        }
-
-        /* How to Use */
-        .steps {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 48px;
-        }
-
-        .step-group h3 {
-            font-size: 1.375rem;
-            margin-bottom: 24px;
-            color: var(--accent);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .step-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .step-list li {
-            display: flex;
-            gap: 16px;
-            align-items: flex-start;
-        }
-
-        .step-number {
-            min-width: 32px;
-            height: 32px;
-            background: var(--accent);
-            color: #0f0f1a;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 0.875rem;
-        }
-
-        .step-text {
-            padding-top: 4px;
-        }
-
-        .step-text code {
-            background: var(--code-bg);
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            color: var(--accent);
-            font-family: 'Consolas', 'SF Mono', monospace;
-        }
-
-        .code-block {
-            background: var(--code-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 16px;
-            margin-top: 12px;
-            font-family: 'Consolas', 'SF Mono', monospace;
-            font-size: 0.9rem;
-            overflow-x: auto;
-            direction: ltr;
-            text-align: left;
-        }
-
-        .code-block .comment {
-            color: #6a737d;
-        }
-
-        .code-block .cmd {
-            color: var(--accent);
-        }
-
-        /* Platforms */
-        .platforms-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 16px;
-        }
-
-        .platform-badge {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            transition: all 0.2s;
-        }
-
-        .platform-badge:hover {
-            border-color: var(--accent);
-        }
-
-        .platform-icon {
-            font-size: 2.5rem;
-            margin-bottom: 12px;
-            color: var(--text-primary);
-            transition: color 0.2s;
-        }
-
-        .platform-badge:hover .platform-icon {
-            color: var(--accent);
-        }
-
-        .platform-name {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-
-        /* Footer */
-        footer {
-            border-top: 1px solid var(--border);
-            padding: 40px 0;
-            text-align: center;
-        }
-
-        footer p {
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-        }
-
-        footer .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 24px;
-            margin-top: 16px;
-        }
-
-        /* Responsive */
+        @media (max-width: 900px) { .features-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-                position: absolute;
-                top: 64px;
-                left: 0;
-                right: 0;
-                background: var(--bg-primary);
-                flex-direction: column;
-                padding: 24px;
-                gap: 16px;
-                border-bottom: 1px solid var(--border);
-            }
-
-            .nav-links.active {
-                display: flex;
-            }
-
-            .hamburger {
-                display: block;
-            }
-
-            .hero h1 {
-                font-size: 2rem;
-            }
-
-            .hero .tagline {
-                font-size: 1rem;
-            }
-
-            .hero-stats {
-                gap: 24px;
-            }
-
-            .stat-value {
-                font-size: 1.5rem;
-            }
-
-            .features-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .steps {
-                grid-template-columns: 1fr;
-                gap: 32px;
-            }
-
-            .section-title {
-                font-size: 1.75rem;
-            }
+            .nav-links { display: none; position: absolute; top: 60px; left: 0; right: 0; background: var(--bg); flex-direction: column; padding: 20px; gap: 14px; border-bottom: 1px solid var(--border); }
+            .nav-links.active { display: flex; }
+            .hamburger { display: block; }
+            .hero { padding: 110px 0 50px; }
+            .hero h1 { font-size: 2rem; }
+            .hero .tagline { font-size: 0.95rem; }
+            .hero-stats { gap: 24px; }
+            .stat-value { font-size: 1.4rem; }
+            .features-grid { grid-template-columns: 1fr; }
+            .steps { grid-template-columns: 1fr; gap: 28px; }
+            .section-title { font-size: 1.6rem; }
+            .platforms-grid { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; }
+            .platform-badge { padding: 14px 10px; }
+            .platform-icon { font-size: 1.8rem; }
+            section { padding: 56px 0; }
+            .btn { padding: 11px 20px; font-size: 0.9rem; }
+        }
+        @media (max-width: 480px) {
+            .hero h1 { font-size: 1.7rem; }
+            .hero-stats { flex-direction: column; gap: 16px; }
+            .platforms-grid { grid-template-columns: repeat(3, 1fr); }
         }
     </style>
 </head>
 <body>
-    <nav>
+    <nav aria-label="التنقل الرئيسي">
         <div class="container">
-            <a href="#" class="logo">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="7 10 12 15 17 10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
+            <a href="#" class="logo" aria-label="YTGrab الرئيسية">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 YTGrab
             </a>
-            <ul class="nav-links" id="navLinks">
-                <li><a href="#features">المميزات</a></li>
-                <li><a href="#how-to-use">كيفية الاستخدام</a></li>
-                <li><a href="#platforms">المنصات</a></li>
-                <li><a href="#download">تحميل</a></li>
-                <li><a href="index.html" class="lang-switch"><i class="fas fa-globe"></i> English</a></li>
+            <ul class="nav-links" id="navLinks" role="menubar">
+                <li role="none"><a href="#features" role="menuitem">المميزات</a></li>
+                <li role="none"><a href="#how-to-use" role="menuitem">كيفية الاستخدام</a></li>
+                <li role="none"><a href="#platforms" role="menuitem">المنصات</a></li>
+                <li role="none"><a href="#download" role="menuitem">تحميل</a></li>
+                <li role="none"><a href="index.html" class="lang-switch" role="menuitem" hreflang="en"><i class="fas fa-globe"></i> English</a></li>
             </ul>
-            <button class="hamburger" id="hamburger" aria-label="Toggle menu">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
+            <button class="hamburger" id="hamburger" aria-label="إظهار/إخفاء القائمة" aria-expanded="false"><span></span><span></span><span></span></button>
         </div>
     </nav>
 
-    <section class="hero" id="download">
-        <div class="container">
-            <h1>حمّل فيديوهات <span>يوتيوب</span> بسهولة</h1>
-            <p class="tagline">تطبيق تحميل فيديوهات وقوائم تشغيل يوتيوب مع إضافة متصفح بأسلوب IDM. حمّل فيديوهات بدقة تصل إلى 4K من أكثر من 12 منصة.</p>
-            <div class="hero-buttons">
-                <a href="https://github.com/a7mdmo74/ytgrap/releases/latest/download/YTGrab.zip" class="btn btn-primary" id="downloadBtn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                        <polyline points="7 10 12 15 17 10"/>
-                        <line x1="12" y1="15" x2="12" y2="3"/>
-                    </svg>
-                    تحميل للويندوز
-                </a>
-                <a href="https://github.com/a7mdmo74/ytgrap/releases" class="btn btn-secondary">
-                    جميع الإصدارات
-                </a>
-            </div>
-            <div class="hero-stats">
-                <div class="stat">
-                    <div class="stat-value">4K</div>
-                    <div class="stat-label">أعلى جودة</div>
+    <main>
+        <section class="hero" id="download">
+            <div class="container">
+                <div class="badge"><i class="fas fa-circle-check"></i> الإصدار 2.0 — الآن مع إضافة المتصفح</div>
+                <h1>حمّل فيديوهات <span>يوتيوب</span><br>بسهولة</h1>
+                <p class="tagline">تطبيق تحميل فيديوهات وقوائم تشغيل يوتيوب مع إضافة متصفح بأسلوب IDM. حمّل فيديوهات بدقة تصل إلى 4K من أكثر من 12 منصة مع دعم الإيقاف المؤقت والإلغاء وقائمة الانتظار.</p>
+                <div class="hero-buttons">
+                    <a href="https://github.com/a7mdmo74/ytgrap/releases/latest/download/YTGrab.zip" class="btn btn-primary" aria-label="تحميل YTGrab للويندوز">
+                        <i class="fas fa-download"></i> تحميل للويندوز
+                    </a>
+                    <a href="https://github.com/a7mdmo74/ytgrap/releases" class="btn btn-secondary" aria-label="عرض جميع الإصدارات">
+                        <i class="fab fa-github"></i> جميع الإصدارات
+                    </a>
                 </div>
-                <div class="stat">
-                    <div class="stat-value">12+</div>
-                    <div class="stat-label">منصة</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value">مجاني</div>
-                    <div class="stat-label">مفتوح المصدر</div>
+                <div class="hero-stats">
+                    <div class="stat"><div class="stat-value">4K</div><div class="stat-label">أعلى جودة</div></div>
+                    <div class="stat"><div class="stat-value">12+</div><div class="stat-label">منصة</div></div>
+                    <div class="stat"><div class="stat-value">مجاني</div><div class="stat-label">مفتوح المصدر</div></div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section id="features">
-        <div class="container">
-            <h2 class="section-title">مميزات قوية</h2>
-            <p class="section-subtitle">كل ما تحتاجه لتحميل وإدارة الفيديوهات من الإنترنت.</p>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-film"></i></div>
-                    <h3>جودة تصل إلى 4K</h3>
-                    <p>حمّل الفيديوهات بجودات متعددة تشمل Ultra HD 4K مع دمج تلقائي للstreams.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-list"></i></div>
-                    <h3>دعم قوائم التشغيل</h3>
-                    <p>الصق رابط قائمة التشغيل وحمّل جميع الفيديوهات دفعة واحدة مع كشف تلقائي.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-bolt"></i></div>
-                    <h3>تقدم مباشر</h3>
-                    <p>عرض فوري لسرعة التحميل والوقت المتبقي وحجم الملف ونسبة التقدم.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-wrench"></i></div>
-                    <h3>صيغ متعددة</h3>
-                    <p>تصدير إلى MP4 أو MKV أو WebM. اضبط إعدادات الأجزاء المتوازية المحاولات.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-puzzle-piece"></i></div>
-                    <h3>إضافة المتصفح</h3>
-                    <p>إضافة بأسلوب IDM لـ Chrome و Edge و Firefox. كشف وتحميل الفيديوهات بنقرة واحدة.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-moon"></i></div>
-                    <h3>وضع مظلم</h3>
-                    <p>واجهة جميلة بلون مظلم مع لمسة كهرمانية. مريحة للاستخدام نهاراً وليلاً.</p>
+        <section id="features" aria-labelledby="features-title">
+            <div class="container">
+                <h2 class="section-title" id="features-title">مميزات قوية</h2>
+                <p class="section-subtitle">كل ما تحتاجه لتحميل وإدارة الفيديوهات من الإنترنت.</p>
+                <div class="features-grid">
+                    <article class="feature-card"><div class="feature-icon"><i class="fas fa-film"></i></div><h3>جودة تصل إلى 4K</h3><p>حمّل الفيديوهات بجودات متعددة تشمل Ultra HD 4K مع دمج تلقائي للstreams.</p></article>
+                    <article class="feature-card"><div class="feature-icon"><i class="fas fa-list-check"></i></div><h3>دعم قوائم التشغيل</h3><p>الصق رابط قائمة التشغيل وحمّل جميع الفيديوهات دفعة واحدة.</p></article>
+                    <article class="feature-card"><div class="feature-icon"><i class="fas fa-layer-group"></i></div><h3>قائمة انتظار التحميل</h3><p>أضف عدة تحميلات من إضافة المتصفح وستُحمّل واحداً تلو الآخر تلقائياً.</p></article>
+                    <article class="feature-card"><div class="feature-icon"><i class="fas fa-pause-circle"></i></div><h3>إيقاف وإلغاء</h3><p>تحكم كامل في التحميلات — أوقف مؤقتاً أو أعد التشغيل أو ألغِ بضغطة واحدة.</p></article>
+                    <article class="feature-card"><div class="feature-icon"><i class="fas fa-puzzle-piece"></i></div><h3>إضافة المتصفح</h3><p>إضافة بأسلوب IDM لـ Chrome و Edge و Firefox. كشف وتحميل الفيديوهات بنقرة واحدة.</p></article>
+                    <article class="feature-card"><div class="feature-icon"><i class="fas fa-bolt"></i></div><h3>تشغيل تلقائي عند الإقلاع</h3><p>يعمل في شريط المهام تلقائياً عند تسجيل الدخول. جاهز دائماً لالتقاط التحميلات.</p></article>
+                    <article class="feature-card"><div class="feature-icon"><i class="fas fa-gauge-high"></i></div><h3>تقدم مباشر</h3><p>عرض فوري لسرعة التحميل والوقت المتبقي وحجم الملف ونسبة التقدم.</p></article>
+                    <article class="feature-card"><div class="feature-icon"><i class="fas fa-sliders"></i></div><h3>قابل للتخصيص</h3><p>اضبط صيغة التصدير (MP4/MKV/WebM) والأجزاء المتوازية والمحاولات والمزيد.</p></article>
+                    <article class="feature-card"><div class="feature-icon"><i class="fas fa-moon"></i></div><h3>وضع مظلم</h3><p>واجهة جميلة بلون مظلم مع لمسة كهرمانية. مريحة للاستخدام نهاراً وليلاً.</p></article>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section id="how-to-use" style="background: var(--bg-secondary);">
-        <div class="container">
-            <h2 class="section-title">كيفية الاستخدام</h2>
-            <p class="section-subtitle">ابدأ في دقائق مع خيارات تثبيت متعددة.</p>
-            <div class="steps">
-                <div class="step-group">
-                    <h3>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="4 17 10 11 4 5"/>
-                            <line x1="12" y1="19" x2="20" y2="19"/>
-                        </svg>
-                        تثبيت سريع (pip)
-                    </h3>
-                    <ul class="step-list">
-                        <li>
-                            <span class="step-number">1</span>
-                            <div class="step-text">
-                                ثبّت Python 3.10+ و FFmpeg
-                                <div class="code-block">
-                                    <span class="comment"># ويندوز</span><br>
-                                    <span class="cmd">winget install Gyan.FFmpeg</span><br><br>
-                                    <span class="comment"># macOS</span><br>
-                                    <span class="cmd">brew install ffmpeg</span><br><br>
-                                    <span class="comment"># Linux</span><br>
-                                    <span class="cmd">sudo apt install ffmpeg</span>
+        <section id="how-to-use" style="background: var(--bg2);" aria-labelledby="howto-title">
+            <div class="container">
+                <h2 class="section-title" id="howto-title">كيفية الاستخدام</h2>
+                <p class="section-subtitle">ابدأ في دقائق مع خيارات تثبيت متعددة.</p>
+                <div class="steps">
+                    <div class="step-group">
+                        <h3><i class="fas fa-terminal"></i> تثبيت سريع (pip)</h3>
+                        <ol class="step-list">
+                            <li>
+                                <span class="step-number">1</span>
+                                <div class="step-text">ثبّت Python 3.10+ و FFmpeg
+                                    <div class="code-block">
+                                        <span class="comment"># ويندوز</span><br>
+                                        <span class="cmd">winget install Gyan.FFmpeg</span><br><br>
+                                        <span class="comment"># macOS</span><br>
+                                        <span class="cmd">brew install ffmpeg</span><br><br>
+                                        <span class="comment"># Linux</span><br>
+                                        <span class="cmd">sudo apt install ffmpeg</span>
+                                    </div>
                                 </div>
-                            </div>
-                        </li>
-                        <li>
-                            <span class="step-number">2</span>
-                            <div class="step-text">ثبّت YTGrab وأشغله</div>
-                        </li>
-                        <li>
-                            <span class="step-number">3</span>
-                            <div class="step-text">الصق رابط يوتيوب واضغط <strong>Fetch</strong></div>
-                        </li>
-                        <li>
-                            <span class="step-number">4</span>
-                            <div class="step-text">اختر الجودة واضغط <strong>Start Download</strong></div>
-                        </li>
-                    </ul>
-                    <div class="code-block">
-                        <span class="cmd">pip install git+https://github.com/a7mdmo74/ytgrap.git</span><br>
-                        <span class="cmd">ytgrab</span>
+                            </li>
+                            <li><span class="step-number">2</span><div class="step-text">ثبّت YTGrab وأشغله</div></li>
+                            <li><span class="step-number">3</span><div class="step-text">الصق رابط يوتيوب واضغط <strong>Fetch</strong></div></li>
+                            <li><span class="step-number">4</span><div class="step-text">اختر الجودة واضغط <strong>Start Download</strong></div></li>
+                        </ol>
+                        <div class="code-block"><span class="cmd">pip install git+https://github.com/a7mdmo74/ytgrap.git</span><br><span class="cmd">ytgrab</span></div>
+                    </div>
+                    <div class="step-group">
+                        <h3><i class="fas fa-puzzle-piece"></i> إضافة المتصفح</h3>
+                        <ol class="step-list">
+                            <li><span class="step-number">1</span><div class="step-text">حمّل وثبّت YTGrab (أو شغّله من المصدر)</div></li>
+                            <li><span class="step-number">2</span><div class="step-text">افتح متصفحك واذهب إلى <code>chrome://extensions</code></div></li>
+                            <li><span class="step-number">3</span><div class="step-text">فعّل <strong>وضع المطور</strong> (الزر في الأعلى يمين)</div></li>
+                            <li><span class="step-number">4</span><div class="step-text">اضغط <strong>Load unpacked</strong> واختر مجلد <code>browser_extension</code></div></li>
+                            <li><span class="step-number">5</span><div class="step-text">تصفح أي منصة مدعومة — يظهر زر التحميل على الفيديوهات</div></li>
+                        </ol>
                     </div>
                 </div>
-                <div class="step-group">
-                    <h3>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                            <line x1="8" y1="21" x2="16" y2="21"/>
-                            <line x1="12" y1="17" x2="12" y2="21"/>
-                        </svg>
-                        إضافة المتصفح
-                    </h3>
-                    <ul class="step-list">
-                        <li>
-                            <span class="step-number">1</span>
-                            <div class="step-text">افتح متصفحك واذهب إلى <code>chrome://extensions</code></div>
-                        </li>
-                        <li>
-                            <span class="step-number">2</span>
-                            <div class="step-text">فعّل <strong>وضع المطور</strong> (الزر في الأعلى يمين)</div>
-                        </li>
-                        <li>
-                            <span class="step-number">3</span>
-                            <div class="step-text">اضغط <strong>Load unpacked</strong واختر مجلد <code>browser_extension</code></div>
-                        </li>
-                        <li>
-                            <span class="step-number">4</span>
-                            <div class="step-text">شغّل تطبيق YTGrab (يبدأ السيرفر على البورت 19850)</div>
-                        </li>
-                        <li>
-                            <span class="step-number">5</span>
-                            <div class="step-text">تصفح أي منصة مدعومة واضغط زر التحميل</div>
-                        </li>
-                    </ul>
-                </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section id="platforms">
-        <div class="container">
-            <h2 class="section-title">المنصات المدعومة</h2>
-            <p class="section-subtitle">حمّل الفيديوهات من أكثر من 12 منصة شهيرة مع إضافة المتصفح.</p>
-            <div class="platforms-grid">
-                <div class="platform-badge">
-                    <div class="platform-icon"><i class="fab fa-youtube"></i></div>
-                    <div class="platform-name">يوتيوب</div>
-                </div>
-                <div class="platform-badge">
-                    <div class="platform-icon"><i class="fab fa-youtube"></i></div>
-                    <div class="platform-name">يوتيوب ميوزك</div>
-                </div>
-                <div class="platform-badge">
-                    <div class="platform-icon"><i class="fab fa-instagram"></i></div>
-                    <div class="platform-name">انستغرام</div>
-                </div>
-                <div class="platform-badge">
-                    <div class="platform-icon"><i class="fab fa-facebook"></i></div>
-                    <div class="platform-name">فيسبوك</div>
-                </div>
-                <div class="platform-badge">
-                    <div class="platform-icon"><i class="fab fa-x-twitter"></i></div>
-                    <div class="platform-name">تويتر / X</div>
-                </div>
-                <div class="platform-badge">
-                    <div class="platform-icon"><i class="fab fa-tiktok"></i></div>
-                    <div class="platform-name">تيك توك</div>
-                </div>
-                <div class="platform-badge">
-                    <div class="platform-icon"><i class="fab fa-vimeo-v"></i></div>
-                    <div class="platform-name">فيوميو</div>
-                </div>
-                <div class="platform-badge">
-                    <div class="platform-icon"><i class="fas fa-tv"></i></div>
-                    <div class="platform-name">ديلي موشن</div>
-                </div>
-                <div class="platform-badge">
-                    <div class="platform-icon"><i class="fab fa-twitch"></i></div>
-                    <div class="platform-name">تويتش</div>
-                </div>
-                <div class="platform-badge">
-                    <div class="platform-icon"><i class="fab fa-reddit"></i></div>
-                    <div class="platform-name">ريديت</div>
-                </div>
-                <div class="platform-badge">
-                    <div class="platform-icon"><i class="fas fa-tower-broadcast"></i></div>
-                    <div class="platform-name">بيلي بيلي</div>
-                </div>
-                <div class="platform-badge">
-                    <div class="platform-icon"><i class="fab fa-soundcloud"></i></div>
-                    <div class="platform-name">ساوند كلاود</div>
+        <section id="platforms" aria-labelledby="platforms-title">
+            <div class="container">
+                <h2 class="section-title" id="platforms-title">المنصات المدعومة</h2>
+                <p class="section-subtitle">حمّل الفيديوهات من أكثر من 12 منصة شهيرة مع إضافة المتصفح.</p>
+                <div class="platforms-grid">
+                    <div class="platform-badge"><div class="platform-icon"><i class="fab fa-youtube"></i></div><div class="platform-name">يوتيوب</div></div>
+                    <div class="platform-badge"><div class="platform-icon"><i class="fab fa-youtube"></i></div><div class="platform-name">يوتيوب ميوزك</div></div>
+                    <div class="platform-badge"><div class="platform-icon"><i class="fab fa-instagram"></i></div><div class="platform-name">انستغرام</div></div>
+                    <div class="platform-badge"><div class="platform-icon"><i class="fab fa-facebook"></i></div><div class="platform-name">فيسبوك</div></div>
+                    <div class="platform-badge"><div class="platform-icon"><i class="fab fa-x-twitter"></i></div><div class="platform-name">تويتر / X</div></div>
+                    <div class="platform-badge"><div class="platform-icon"><i class="fab fa-tiktok"></i></div><div class="platform-name">تيك توك</div></div>
+                    <div class="platform-badge"><div class="platform-icon"><i class="fab fa-vimeo-v"></i></div><div class="platform-name">فيوميو</div></div>
+                    <div class="platform-badge"><div class="platform-icon"><i class="fas fa-tv"></i></div><div class="platform-name">ديلي موشن</div></div>
+                    <div class="platform-badge"><div class="platform-icon"><i class="fab fa-twitch"></i></div><div class="platform-name">تويتش</div></div>
+                    <div class="platform-badge"><div class="platform-icon"><i class="fab fa-reddit"></i></div><div class="platform-name">ريديت</div></div>
+                    <div class="platform-badge"><div class="platform-icon"><i class="fas fa-tower-broadcast"></i></div><div class="platform-name">بيلي بيلي</div></div>
+                    <div class="platform-badge"><div class="platform-icon"><i class="fab fa-soundcloud"></i></div><div class="platform-name">ساوند كلاود</div></div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section id="cta" style="background: var(--bg-secondary);">
-        <div class="container" style="text-align: center;">
-            <h2 class="section-title">جاهز للبدء؟</h2>
-            <p class="section-subtitle">حمّل YTGrab الآن وابدأ في حفظ فيديوهاتك المفضلة.</p>
-            <div class="hero-buttons">
-                <a href="https://github.com/a7mdmo74/ytgrap/releases/latest/download/YTGrab.zip" class="btn btn-primary">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                        <polyline points="7 10 12 15 17 10"/>
-                        <line x1="12" y1="15" x2="12" y2="3"/>
-                    </svg>
-                    تحميل للويندوز
-                </a>
-                <a href="https://github.com/a7mdmo74/ytgrap" class="btn btn-secondary">
-                    عرض على GitHub
-                </a>
+        <section class="cta" id="cta">
+            <div class="container" style="text-align: center;">
+                <h2 class="section-title">جاهز للبدء؟</h2>
+                <p class="section-subtitle">حمّل YTGrab الآن وابدأ في حفظ فيديوهاتك المفضلة.</p>
+                <div class="hero-buttons">
+                    <a href="https://github.com/a7mdmo74/ytgrap/releases/latest/download/YTGrab.zip" class="btn btn-primary" aria-label="تحميل YTGrab للويندوز"><i class="fas fa-download"></i> تحميل للويندوز</a>
+                    <a href="https://github.com/a7mdmo74/ytgrap" class="btn btn-secondary" aria-label="عرض على GitHub"><i class="fab fa-github"></i> عرض على GitHub</a>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
+    </main>
 
     <footer>
         <div class="container">
@@ -748,19 +281,20 @@
             <div class="footer-links">
                 <a href="https://github.com/a7mdmo74/ytgrap">GitHub</a>
                 <a href="https://github.com/a7mdmo74/ytgrap/releases">الإصدارات</a>
-                <a href="https://github.com/a7mdmo74/ytgrap/blob/main/LICENSE">الرخصة</a>
+                <a href="https://github.com/a7mdmo74/ytgrap/blob/master/LICENSE">الرخصة</a>
             </div>
         </div>
     </footer>
 
     <script>
         document.getElementById('hamburger').addEventListener('click', function() {
+            this.setAttribute('aria-expanded', this.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
             document.getElementById('navLinks').classList.toggle('active');
         });
-
         document.querySelectorAll('.nav-links a').forEach(function(link) {
             link.addEventListener('click', function() {
                 document.getElementById('navLinks').classList.remove('active');
+                document.getElementById('hamburger').setAttribute('aria-expanded', 'false');
             });
         });
     </script>
