@@ -1334,12 +1334,30 @@ def headless_download(item):
         download_queue.mark_error(item, str(e))
 
 
+import socket
+
+def _is_already_running():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(1)
+        result = s.connect_ex(('127.0.0.1', SERVER_PORT))
+        s.close()
+        return result == 0
+    except:
+        return False
+
 def main():
     if "--service" in sys.argv:
+        if _is_already_running():
+            return
         run_headless_service()
         return
 
     start_minimized = "--minimized" in sys.argv
+
+    if _is_already_running():
+        return
+
     root = tk.Tk()
     app  = YTGrabApp(root)
 
