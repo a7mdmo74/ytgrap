@@ -7,19 +7,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Check server connection
     async function checkConnection() {
-        try {
-            const response = await fetch('http://127.0.0.1:19850/ping', {
-                signal: AbortSignal.timeout(2000)
+        return new Promise((resolve) => {
+            chrome.runtime.sendMessage({ type: 'CHECK_SERVER' }, (response) => {
+                if (response?.connected) {
+                    statusDot.className = 'status-dot connected';
+                    statusText.textContent = 'Connected';
+                    resolve(true);
+                } else {
+                    statusDot.className = 'status-dot disconnected';
+                    statusText.textContent = 'Disconnected';
+                    resolve(false);
+                }
             });
-            if (response.ok) {
-                statusDot.className = 'status-dot connected';
-                statusText.textContent = 'Connected';
-                return true;
-            }
-        } catch {}
-        statusDot.className = 'status-dot disconnected';
-        statusText.textContent = 'Disconnected';
-        return false;
+        });
     }
 
     // Load detected videos
@@ -58,24 +58,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const url = btn.dataset.url;
                 const title = btn.dataset.title;
 
-                try {
-                    const response = await fetch('http://127.0.0.1:19850/download', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ url, title, platform: 'browser' })
-                    });
-
-                    if (response.ok) {
+                chrome.runtime.sendMessage({ type: 'START_DOWNLOAD', data: { url, title, platform: 'browser' } }, (response) => {
+                    if (response?.success) {
                         btn.textContent = 'Started!';
                         btn.style.background = '#22c55e';
                         setTimeout(() => {
                             btn.textContent = 'Download';
                             btn.style.background = '';
                         }, 2000);
+                    } else {
+                        alert('Make sure YTGrab app is running on your computer!');
                     }
-                } catch {
-                    alert('Make sure YTGrab app is running on your computer!');
-                }
+                });
             });
         });
     }

@@ -91,8 +91,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
 
     if (message.type === "START_DOWNLOAD") {
-        sendToServer(message.data).then(ok => {
-            sendResponse({ success: ok });
+        fetch(`${serverUrl}/download`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(message.data)
+        }).then(response => {
+            sendResponse({ success: response.ok });
+        }).catch(() => {
+            sendResponse({ success: false });
         });
         return true;
     }

@@ -166,19 +166,13 @@
     }
 
     async function startDownload(info) {
-        try {
-            const response = await fetch('http://127.0.0.1:19850/download', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(info)
-            });
-            if (response.ok) {
+        chrome.runtime.sendMessage({ type: 'START_DOWNLOAD', data: info }, (response) => {
+            if (response?.success) {
                 showNotification('Download started!', 'success');
-                return;
+            } else {
+                showNotification('Make sure YTGrab app is running!', 'error');
             }
-        } catch {}
-
-        showNotification('Make sure YTGrab app is running!', 'error');
+        });
     }
 
     function showNotification(message, type) {
