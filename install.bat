@@ -53,6 +53,7 @@ powershell -Command "$WshShell = New-Object -ComObject WScript.Shell; $s = $WshS
 
 :: Add to Windows startup (runs in system tray with GUI)
 echo Adding to Windows startup...
+schtasks /delete /tn "YTGrab" /f 2>nul
 schtasks /create /tn "YTGrab" /tr "\"%INSTALLDIR%\YTGrab.exe\" --minimized" /sc onlogon /rl highest /f
 
 echo.

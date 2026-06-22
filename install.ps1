@@ -46,6 +46,7 @@ $Shortcut.Save()
 
 # Add to Windows startup (runs in system tray with GUI)
 Write-Host "Adding to Windows startup..." -ForegroundColor Gray
+schtasks /delete /tn "YTGrab" /f 2>$null
 schtasks /create /tn "YTGrab" /tr "`"$InstallDir\YTGrab.exe`" --minimized" /sc onlogon /rl highest /f
 
 # Start the app now
