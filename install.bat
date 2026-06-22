@@ -51,9 +51,9 @@ powershell -Command "$WshShell = New-Object -ComObject WScript.Shell; $desk = [E
 echo Creating Start Menu shortcut...
 powershell -Command "$WshShell = New-Object -ComObject WScript.Shell; $s = $WshShell.CreateShortcut([System.IO.Path]::Combine($env:ProgramData, 'Microsoft', 'Windows', 'Start Menu', 'Programs', 'YTGrab.lnk')); $s.TargetPath = '%INSTALLDIR%\YTGrab.exe'; $s.IconLocation = '%INSTALLDIR%\YTGrab.exe,0'; $s.Save()"
 
-:: Add to Windows startup (runs minimized to tray)
+:: Add to Windows startup (runs as background service)
 echo Adding to Windows startup...
-powershell -Command "New-ScheduledTask -TaskName 'YTGrab' -Description 'YTGrab Download Manager' -Trigger (New-ScheduledTaskTrigger -AtLogOn) -Action (New-ScheduledTaskAction -Execute '%INSTALLDIR%\YTGrab.exe' -Argument '--minimized') -Settings (New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -RunOnlyIfNetworkAvailable) -Force"
+powershell -Command "New-ScheduledTask -TaskName 'YTGrab' -Description 'YTGrab Download Manager' -Trigger (New-ScheduledTaskTrigger -AtLogOn) -Action (New-ScheduledTaskAction -Execute '%INSTALLDIR%\YTGrab.exe' -Argument '--service') -Settings (New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -RunOnlyIfNetworkAvailable -ExecutionTimeLimit (New-TimeSpan -Days 365)) -Force"
 
 echo.
 echo ================================

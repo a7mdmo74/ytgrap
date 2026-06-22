@@ -44,9 +44,20 @@ $Shortcut.TargetPath = "$InstallDir\YTGrab.exe"
 $Shortcut.IconLocation = "$InstallDir\YTGrab.exe,0"
 $Shortcut.Save()
 
+# Add to Windows startup (runs as background service)
+Write-Host "Adding to Windows startup..." -ForegroundColor Gray
+New-ScheduledTask -TaskName 'YTGrab' -Description 'YTGrab Download Manager' -Trigger (New-ScheduledTaskTrigger -AtLogOn) -Action (New-ScheduledTaskAction -Execute "$InstallDir\YTGrab.exe" -Argument '--service') -Settings (New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -RunOnlyIfNetworkAvailable -ExecutionTimeLimit (New-TimeSpan -Days 365)) -Force
+
+# Start the service now
+Write-Host "Starting YTGrab service..." -ForegroundColor Gray
+Start-Process -FilePath "$InstallDir\YTGrab.exe" -ArgumentList '--service' -WindowStyle Hidden
+
 Write-Host ""
 Write-Host "Installation complete!" -ForegroundColor Green
-Write-Host "You can now launch YTGrab from:" -ForegroundColor Cyan
+Write-Host "YTGrab is now running as a background service on port 19850." -ForegroundColor Cyan
+Write-Host "The browser extension will connect automatically." -ForegroundColor Cyan
+Write-Host ""
+Write-Host "You can also launch YTGrab with full GUI from:" -ForegroundColor Cyan
 Write-Host "  - Desktop shortcut" -ForegroundColor White
 Write-Host "  - Start Menu" -ForegroundColor White
 Write-Host "  - Or run: $InstallDir\YTGrab.exe" -ForegroundColor White

@@ -1231,7 +1231,114 @@ def create_tray_icon():
     return img
 
 
+def run_headless_service():
+    import signal
+
+    server = start_server_headless()
+
+    if HAS_TRAY:
+        icon_image = create_tray_icon()
+        menu = pystray.Menu(
+            pystray.MenuItem("YTGrab Service (port 19850)", None, enabled=False),
+            pystray.MenuItem("Quit", lambda icon, item: (icon.stop(), os._exit(0)))
+        )
+        tray_icon = pystray.Icon("YTGrab", icon_image, "YTGrab Download Manager", menu)
+        tray_icon.run()
+    else:
+        print("YTGrab service running on port 19850. Press Ctrl+C to stop.")
+        try:
+            while True:
+                time.sleep(60)
+        except KeyboardInterrupt:
+            pass
+
+def start_server_headless():
+    class HeadlessHandler(BaseHTTPRequestHandler):
+        def log_message(self, format, *args):
+            pass
+
+        def _send_json(self, data, status=200):
+            self.send_response(status)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type")
+            self.end_headers()
+            self.wfile.write(json.dumps(data).encode())
+
+        def do_OPTIONS(self):
+            self.send_response(200)
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type")
+            self.end_headers()
+
+        def do_GET(self):
+            if self.path == "/ping":
+                self._send_json({"status": "ok", "version": "2.0.0", "mode": "service"})
+            elif self.path == "/queue":
+                items = download_queue.get_all()
+                self._send_json({"queue": items})
+            elif self.path == "/status":
+                self._send_json({
+                    "status": "ready",
+                    "queue_size": len(download_queue.queue),
+                    "ffmpeg": bool(FFMPEG_DIR),
+                    "mode": "service"
+                })
+            else:
+                self._send_json({"error": "not found"}, 404)
+
+        def do_POST(self):
+            content_length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(content_length)
+            try:
+                data = json.loads(body)
+            except json.JSONDecodeError:
+                self._send_json({"error": "invalid json"}, 400)
+                return
+
+            if self.path in ("/add", "/download"):
+                item = download_queue.add(data)
+                threading.Thread(target=headless_download, args=(item,), daemon=True).start()
+                self._send_json({"success": True, "id": item["id"]})
+            else:
+                self._send_json({"error": "not found"}, 404)
+
+    server = HTTPServer(("127.0.0.1", SERVER_PORT), HeadlessHandler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    return server
+
+def headless_download(item):
+    url = item.get("url")
+    if not url:
+        download_queue.mark_error(item, "No URL provided")
+        return
+
+    try:
+        ydl_opts = {
+            'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+            'outtmpl': os.path.join(os.path.expanduser('~'), 'Downloads', '%(title)s.%(ext)s'),
+            'noplaylist': True,
+            'quiet': True,
+            'no_warnings': True,
+        }
+        if FFMPEG_DIR:
+            ydl_opts['ffmpeg_location'] = FFMPEG_DIR
+
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
+        download_queue.mark_done(item)
+    except Exception as e:
+        download_queue.mark_error(item, str(e))
+
+
 def main():
+    if "--service" in sys.argv:
+        run_headless_service()
+        return
+
     start_minimized = "--minimized" in sys.argv
     root = tk.Tk()
     app  = YTGrabApp(root)
