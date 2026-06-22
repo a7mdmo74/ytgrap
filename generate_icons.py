@@ -1,44 +1,50 @@
-"""Generate placeholder icons for the browser extension."""
+"""Generate branded YTGrab icons for the browser extension using Pillow."""
 import os
-import struct
-import zlib
+from PIL import Image, ImageDraw, ImageFont
 
-def create_png(width, height, color_rgb=(245, 166, 35)):
-    """Create a simple PNG icon with the given color."""
-    def chunk(chunk_type, data):
-        c = chunk_type + data
-        return struct.pack('>I', len(data)) + c + struct.pack('>I', zlib.crc32(c) & 0xffffffff)
 
-    # Create raw pixel data
-    raw_data = b''
-    for y in range(height):
-        raw_data += b'\x00'  # filter byte
-        for x in range(width):
-            # Simple circle with YT colors
-            cx, cy = width // 2, height // 2
-            r = min(width, height) // 2 - 1
-            dx, dy = x - cx, y - cy
-            if dx * dx + dy * dy <= r * r:
-                # Inside circle - use red for YT
-                raw_data += bytes([239, 68, 68, 255])
-            else:
-                raw_data += bytes([0, 0, 0, 0])
+def create_icon(size):
+    """Create a YTGrab branded icon: dark circle with amber border and 'YT' text."""
+    img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
 
-    # PNG signature
-    signature = b'\x89PNG\r\n\x1a\n'
+    cx, cy = size / 2, size / 2
+    radius = size / 2 - 0.5
+    border = max(1, int(size * 0.08))
 
-    # IHDR chunk
-    ihdr_data = struct.pack('>IIBBBBB', width, height, 8, 6, 0, 0, 0)
-    ihdr = chunk(b'IHDR', ihdr_data)
+    # Amber border circle
+    draw.ellipse(
+        [cx - radius, cy - radius, cx + radius, cy + radius],
+        fill=(226, 183, 20, 255)
+    )
 
-    # IDAT chunk
-    compressed = zlib.compress(raw_data)
-    idat = chunk(b'IDAT', compressed)
+    # Dark inner circle
+    inner = radius - border
+    draw.ellipse(
+        [cx - inner, cy - inner, cx + inner, cy + inner],
+        fill=(22, 33, 62, 255)
+    )
 
-    # IEND chunk
-    iend = chunk(b'IEND', b'')
+    # Draw "YT" text
+    text = "YT"
+    font_size = int(size * 0.45)
+    try:
+        font = ImageFont.truetype("arial.ttf", font_size)
+    except (OSError, IOError):
+        try:
+            font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", font_size)
+        except (OSError, IOError):
+            font = ImageFont.load_default()
 
-    return signature + ihdr + idat + iend
+    bbox = draw.textbbox((0, 0), text, font=font)
+    tw = bbox[2] - bbox[0]
+    th = bbox[3] - bbox[1]
+    tx = cx - tw / 2
+    ty = cy - th / 2 - bbox[1]
+
+    draw.text((tx, ty), text, fill=(226, 183, 20, 255), font=font)
+
+    return img
 
 
 def main():
@@ -46,11 +52,10 @@ def main():
     os.makedirs(icons_dir, exist_ok=True)
 
     for size in [16, 48, 128]:
-        png_data = create_png(size, size)
+        img = create_icon(size)
         filepath = os.path.join(icons_dir, f'icon{size}.png')
-        with open(filepath, 'wb') as f:
-            f.write(png_data)
-        print(f"Created {filepath}")
+        img.save(filepath, 'PNG')
+        print(f"Created {filepath} ({size}x{size})")
 
 
 if __name__ == '__main__':
