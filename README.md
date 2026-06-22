@@ -4,7 +4,7 @@ A YouTube video and playlist downloader with IDM-style browser integration.
 
 Works on **Windows**, **macOS**, and **Linux**.
 
-[العربية](README-ar.md)
+[**Live Page**](https://a7mdmo74.github.io/ytgrap/) | [العربية](README-ar.md)
 
 ## Features
 
