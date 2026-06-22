@@ -6,6 +6,7 @@
     <title>YTGrab - YouTube Video Downloader</title>
     <meta name="description" content="YouTube video and playlist downloader with IDM-style browser extension. Download videos up to 4K from 12+ platforms.">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⬇</text></svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         *, *::before, *::after {
             margin: 0;
@@ -268,8 +269,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             margin-bottom: 16px;
+            color: var(--accent);
         }
 
         .feature-card h3 {
@@ -376,8 +378,14 @@
         }
 
         .platform-icon {
-            font-size: 2rem;
-            margin-bottom: 8px;
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+            transition: color 0.2s;
+        }
+
+        .platform-badge:hover .platform-icon {
+            color: var(--accent);
         }
 
         .platform-name {
@@ -523,32 +531,32 @@
             <p class="section-subtitle">Everything you need to download and manage videos from the web.</p>
             <div class="features-grid">
                 <div class="feature-card">
-                    <div class="feature-icon">🎬</div>
+                    <div class="feature-icon"><i class="fas fa-film"></i></div>
                     <h3>Up to 4K Quality</h3>
                     <p>Download videos in multiple qualities, including 4K Ultra HD, with automatic stream merging.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">📋</div>
+                    <div class="feature-icon"><i class="fas fa-list"></i></div>
                     <h3>Playlist Support</h3>
                     <p>Paste a playlist URL and download all videos at once with automatic detection.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
+                    <div class="feature-icon"><i class="fas fa-bolt"></i></div>
                     <h3>Live Progress</h3>
                     <p>Real-time display of download speed, ETA, file size, and progress percentage.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">🔧</div>
+                    <div class="feature-icon"><i class="fas fa-wrench"></i></div>
                     <h3>Multiple Formats</h3>
                     <p>Export to MP4, MKV, or WebM. Adjust parallel fragments and retry settings.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">🌐</div>
+                    <div class="feature-icon"><i class="fas fa-puzzle-piece"></i></div>
                     <h3>Browser Extension</h3>
                     <p>IDM-style extension for Chrome, Edge, and Firefox. Detect and download videos with one click.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">🎨</div>
+                    <div class="feature-icon"><i class="fas fa-moon"></i></div>
                     <h3>Dark Theme</h3>
                     <p>Beautiful dark UI with amber accent. Comfortable to use day and night.</p>
                 </div>
@@ -644,51 +652,51 @@
             <p class="section-subtitle">Download videos from 12+ popular platforms with the browser extension.</p>
             <div class="platforms-grid">
                 <div class="platform-badge">
-                    <div class="platform-icon">▶️</div>
+                    <div class="platform-icon"><i class="fab fa-youtube"></i></div>
                     <div class="platform-name">YouTube</div>
                 </div>
                 <div class="platform-badge">
-                    <div class="platform-icon">🎵</div>
+                    <div class="platform-icon"><i class="fab fa-youtube"></i></div>
                     <div class="platform-name">YouTube Music</div>
                 </div>
                 <div class="platform-badge">
-                    <div class="platform-icon">📷</div>
+                    <div class="platform-icon"><i class="fab fa-instagram"></i></div>
                     <div class="platform-name">Instagram</div>
                 </div>
                 <div class="platform-badge">
-                    <div class="platform-icon">📘</div>
+                    <div class="platform-icon"><i class="fab fa-facebook"></i></div>
                     <div class="platform-name">Facebook</div>
                 </div>
                 <div class="platform-badge">
-                    <div class="platform-icon">🐦</div>
+                    <div class="platform-icon"><i class="fab fa-x-twitter"></i></div>
                     <div class="platform-name">Twitter / X</div>
                 </div>
                 <div class="platform-badge">
-                    <div class="platform-icon">🎵</div>
+                    <div class="platform-icon"><i class="fab fa-tiktok"></i></div>
                     <div class="platform-name">TikTok</div>
                 </div>
                 <div class="platform-badge">
-                    <div class="platform-icon">🎥</div>
+                    <div class="platform-icon"><i class="fab fa-vimeo-v"></i></div>
                     <div class="platform-name">Vimeo</div>
                 </div>
                 <div class="platform-badge">
-                    <div class="platform-icon">📺</div>
+                    <div class="platform-icon"><i class="fas fa-tv"></i></div>
                     <div class="platform-name">Dailymotion</div>
                 </div>
                 <div class="platform-badge">
-                    <div class="platform-icon">🎮</div>
+                    <div class="platform-icon"><i class="fab fa-twitch"></i></div>
                     <div class="platform-name">Twitch</div>
                 </div>
                 <div class="platform-badge">
-                    <div class="platform-icon">🤖</div>
+                    <div class="platform-icon"><i class="fab fa-reddit"></i></div>
                     <div class="platform-name">Reddit</div>
                 </div>
                 <div class="platform-badge">
-                    <div class="platform-icon">📺</div>
+                    <div class="platform-icon"><i class="fas fa-tower-broadcast"></i></div>
                     <div class="platform-name">Bilibili</div>
                 </div>
                 <div class="platform-badge">
-                    <div class="platform-icon">🔊</div>
+                    <div class="platform-icon"><i class="fab fa-soundcloud"></i></div>
                     <div class="platform-name">SoundCloud</div>
                 </div>
             </div>
