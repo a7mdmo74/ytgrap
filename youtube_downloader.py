@@ -723,11 +723,21 @@ class YTGrabApp:
             if url:
                 self.url_entry.delete(0, "end")
                 self.url_entry.insert(0, url)
+                self.root.after(0, self._show_window)
                 self.root.after(100, lambda: self._auto_fetch_and_download(item))
             else:
                 download_queue.mark_error(item, "No URL provided")
                 self._is_downloading = False
                 self._start_next_download()
+
+    def _show_window(self):
+        try:
+            if self.root.state() == 'withdrawn':
+                self.root.deiconify()
+                self.root.lift()
+                self.root.focus_force()
+        except Exception:
+            pass
 
     def _auto_fetch_and_download(self, item):
         url = item.get("url")
