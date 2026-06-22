@@ -51,9 +51,9 @@ powershell -Command "$WshShell = New-Object -ComObject WScript.Shell; $desk = [E
 echo Creating Start Menu shortcut...
 powershell -Command "$WshShell = New-Object -ComObject WScript.Shell; $s = $WshShell.CreateShortcut([System.IO.Path]::Combine($env:ProgramData, 'Microsoft', 'Windows', 'Start Menu', 'Programs', 'YTGrab.lnk')); $s.TargetPath = '%INSTALLDIR%\YTGrab.exe'; $s.IconLocation = '%INSTALLDIR%\YTGrab.exe,0'; $s.Save()"
 
-:: Add to Windows startup (runs as background service)
+:: Add to Windows startup (runs in system tray with GUI)
 echo Adding to Windows startup...
-schtasks /create /tn "YTGrab" /tr "\"%INSTALLDIR%\YTGrab.exe\" --service" /sc onlogon /rl highest /f
+schtasks /create /tn "YTGrab" /tr "\"%INSTALLDIR%\YTGrab.exe\" --minimized" /sc onlogon /rl highest /f
 
 echo.
 echo ================================
@@ -61,13 +61,10 @@ echo    Installation Complete!
 echo ================================
 echo.
 echo YTGrab will now:
-echo   - Start automatically when you log in
-echo   - Run in system tray (background)
-echo   - Detect videos from browser extension
+echo   - Start automatically when you log in (system tray)
+echo   - Listen for browser extension downloads on port 19850
+echo   - Show download progress in the app
 echo.
-echo You can launch YTGrab from:
-echo   - Desktop shortcut
-echo   - Start Menu
-echo   - System tray icon
+echo Click the YTGrab tray icon to show the app.
 echo.
 pause

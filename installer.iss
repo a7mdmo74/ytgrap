@@ -20,7 +20,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: "autostart"; Description: "Start YTGrab as background service on login"; GroupDescription: "Startup:"; Flags: checkedonce
+Name: "autostart"; Description: "Start YTGrab in system tray on login"; GroupDescription: "Startup:"; Flags: checkedonce
 
 [Files]
 Source: "D:\projects\ytgrap\dist\YTGrab\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
@@ -31,7 +31,7 @@ Name: "{group}\{cm:UninstallProgram,YTGrab}"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\YTGrab"; Filename: "{app}\YTGrab.exe"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\YTGrab.exe"; Parameters: "--service"; Description: "Start YTGrab background service"; Flags: nowait postinstall skipifsilent skipifnotautostart; Tasks: autostart
+Filename: "{app}\YTGrab.exe"; Parameters: "--minimized"; Description: "Start YTGrab in system tray"; Flags: nowait postinstall skipifsilent skipifnotautostart; Tasks: autostart
 Filename: "{app}\YTGrab.exe"; Description: "{cm:LaunchProgram,YTGrab}"; Flags: nowait postinstall skipifsilent
 
 [UninstallDelete]
@@ -46,7 +46,7 @@ begin
   begin
     if IsTaskSelected('autostart') then
     begin
-      Exec('schtasks', '/create /tn "YTGrab" /tr "\"' + ExpandConstant('{app}\YTGrab.exe') + '\" --service" /sc onlogon /rl highest /f', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+      Exec('schtasks', '/create /tn "YTGrab" /tr "\"' + ExpandConstant('{app}\YTGrab.exe') + '\" --minimized" /sc onlogon /rl highest /f', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
     end;
   end;
 end;

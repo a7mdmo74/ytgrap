@@ -44,18 +44,19 @@ $Shortcut.TargetPath = "$InstallDir\YTGrab.exe"
 $Shortcut.IconLocation = "$InstallDir\YTGrab.exe,0"
 $Shortcut.Save()
 
-# Add to Windows startup (runs as background service)
+# Add to Windows startup (runs in system tray with GUI)
 Write-Host "Adding to Windows startup..." -ForegroundColor Gray
-schtasks /create /tn "YTGrab" /tr "`"$InstallDir\YTGrab.exe`" --service" /sc onlogon /rl highest /f
+schtasks /create /tn "YTGrab" /tr "`"$InstallDir\YTGrab.exe`" --minimized" /sc onlogon /rl highest /f
 
-# Start the service now
-Write-Host "Starting YTGrab service..." -ForegroundColor Gray
-Start-Process -FilePath "$InstallDir\YTGrab.exe" -ArgumentList '--service' -WindowStyle Hidden
+# Start the app now
+Write-Host "Starting YTGrab..." -ForegroundColor Gray
+Start-Process -FilePath "$InstallDir\YTGrab.exe" -ArgumentList '--minimized' -WindowStyle Hidden
 
 Write-Host ""
 Write-Host "Installation complete!" -ForegroundColor Green
-Write-Host "YTGrab is now running as a background service on port 19850." -ForegroundColor Cyan
-Write-Host "The browser extension will connect automatically." -ForegroundColor Cyan
+Write-Host "YTGrab is now running in the system tray." -ForegroundColor Cyan
+Write-Host "The browser extension is connected to port 19850." -ForegroundColor Cyan
+Write-Host "Click the tray icon to show the app and see download progress." -ForegroundColor Cyan
 Write-Host ""
 Write-Host "You can also launch YTGrab with full GUI from:" -ForegroundColor Cyan
 Write-Host "  - Desktop shortcut" -ForegroundColor White
