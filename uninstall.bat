@@ -19,7 +19,7 @@ echo.
 
 :: Remove scheduled task (startup)
 echo Removing startup task...
-powershell -Command "Unregister-ScheduledTask -TaskName 'YTGrab' -Confirm:$false" 2>nul
+schtasks /delete /tn "YTGrab" /f 2>nul
 
 :: Remove desktop shortcut
 if exist "%USERPROFILE%\Desktop\YTGrab.lnk" del "%USERPROFILE%\Desktop\YTGrab.lnk"

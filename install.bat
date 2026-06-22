@@ -53,7 +53,7 @@ powershell -Command "$WshShell = New-Object -ComObject WScript.Shell; $s = $WshS
 
 :: Add to Windows startup (runs as background service)
 echo Adding to Windows startup...
-powershell -Command "New-ScheduledTask -TaskName 'YTGrab' -Description 'YTGrab Download Manager' -Trigger (New-ScheduledTaskTrigger -AtLogOn) -Action (New-ScheduledTaskAction -Execute '%INSTALLDIR%\YTGrab.exe' -Argument '--service') -Settings (New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -RunOnlyIfNetworkAvailable -ExecutionTimeLimit (New-TimeSpan -Days 365)) -Force"
+schtasks /create /tn "YTGrab" /tr "\"%INSTALLDIR%\YTGrab.exe\" --service" /sc onlogon /rl highest /f
 
 echo.
 echo ================================

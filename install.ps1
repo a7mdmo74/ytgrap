@@ -46,7 +46,7 @@ $Shortcut.Save()
 
 # Add to Windows startup (runs as background service)
 Write-Host "Adding to Windows startup..." -ForegroundColor Gray
-New-ScheduledTask -TaskName 'YTGrab' -Description 'YTGrab Download Manager' -Trigger (New-ScheduledTaskTrigger -AtLogOn) -Action (New-ScheduledTaskAction -Execute "$InstallDir\YTGrab.exe" -Argument '--service') -Settings (New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -RunOnlyIfNetworkAvailable -ExecutionTimeLimit (New-TimeSpan -Days 365)) -Force
+schtasks /create /tn "YTGrab" /tr "`"$InstallDir\YTGrab.exe`" --service" /sc onlogon /rl highest /f
 
 # Start the service now
 Write-Host "Starting YTGrab service..." -ForegroundColor Gray
